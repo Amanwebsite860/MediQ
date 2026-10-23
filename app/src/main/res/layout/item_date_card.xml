@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/cardDateContainer"
+    android:layout_width="@dimen/date_card_width"
+    android:layout_height="@dimen/date_card_height"
+    android:layout_marginEnd="@dimen/spacing_sm"
+    android:background="@drawable/bg_date_card"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="4dp">
+
+    <TextView
+        android:id="@+id/tvDayOfWeek"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mon"
+        android:textColor="@color/selector_selected_secondary_text"
+        android:textSize="@dimen/text_sm"
+        android:fontFamily="sans-serif-medium" />
+
+    <TextView
+        android:id="@+id/tvDayNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="2dp"
+        android:text="14"
+        android:textColor="@color/selector_selected_primary_text"
+        android:textSize="@dimen/text_xl"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tvMonth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Apr"
+        android:textColor="@color/selector_selected_secondary_text"
+        android:textSize="@dimen/text_sm"
+        android:fontFamily="sans-serif-medium" />
+
+</LinearLayout>

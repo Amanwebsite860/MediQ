@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand Colors -->
+    <color name="colorPrimary">#1976D2</color>
+    <color name="colorPrimaryDark">#1565C0</color>
+    <color name="colorPrimaryLight">#42A5F5</color>
+    <color name="colorAccent">#2196F3</color>
+    <color name="colorLogoGreen">#00C853</color>
+    <color name="colorGoogleText">#374151</color>
+
+    <!-- Background & Surface -->
+    <color name="colorBackground">#F5F8FF</color>
+    <color name="colorBackgroundLight">#EEF4FF</color>
+    <color name="colorSurface">#FFFFFF</color>
+    <color name="colorCardBackground">#FFFFFF</color>
+
+    <!-- Text -->
+    <color name="colorTextPrimary">#1A1A2E</color>
+    <color name="colorTextSecondary">#6B7280</color>
+    <color name="colorTextHint">#9CA3AF</color>
+    <color name="colorTextOnPrimary">#FFFFFF</color>
+    <color name="colorTextLink">#1976D2</color>
+
+    <!-- Status Colors -->
+    <color name="colorSuccess">#2E7D32</color>
+    <color name="colorSuccessLight">#E8F5E9</color>
+    <color name="colorError">#D32F2F</color>
+    <color name="colorErrorLight">#FFEBEE</color>
+    <color name="colorWarning">#F9A825</color>
+    <color name="colorWarningLight">#FFF8E1</color>
+    <color name="colorInfo">#0288D1</color>
+    <color name="colorInfoLight">#E1F5FE</color>
+
+    <!-- Badge/Icon Background Colors (Home Screen) -->
+    <color name="colorBadgePurple">#EDE7F6</color>
+    <color name="colorBadgePurpleIcon">#7C4DFF</color>
+    <color name="colorBadgeGreen">#E8F5E9</color>
+    <color name="colorBadgeGreenIcon">#00C853</color>
+    <color name="colorBadgePink">#FCE4EC</color>
+    <color name="colorBadgePinkIcon">#FF5252</color>
+    <color name="colorBadgeTeal">#E0F2F1</color>
+    <color name="colorBadgeTealIcon">#009688</color>
+    <color name="colorBadgeLavender">#F3E5F5</color>
+    <color name="colorBadgeLavenderIcon">#9C27B0</color>
+
+    <!-- Queue Status Colors -->
+    <color name="colorQueueCompleted">#4CAF50</color>
+    <color name="colorQueueInProgress">#2196F3</color>
+    <color name="colorQueueWaiting">#9E9E9E</color>
+    <color name="colorQueueYourTurn">#009688</color>
+    <color name="colorQueueYourTurnBg">#E0F2F1</color>
+
+    <!-- Star Rating -->
+    <color name="colorStar">#FFC107</color>
+
+    <!-- Divider -->
+    <color name="colorDivider">#E0E0E0</color>
+
+    <!-- Bottom Nav -->
+    <color name="colorBottomNavActive">#1976D2</color>
+    <color name="colorBottomNavInactive">#9E9E9E</color>
+
+    <!-- Basics -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="transparent">#00000000</color>
+
+    <!-- v2 UI (Swiggy-style) -->
+    <color name="colorRatingGreen">#1BA672</color>
+    <color name="colorSos">#E53935</color>
+    <color name="colorSosLight">#FFEBEE</color>
+    <color name="colorChipStroke">#D9DEE8</color>
+    <color name="colorChipSelectedBg">#E8F1FD</color>
+    <color name="colorStripBg">#0F2A4A</color>
+    <color name="colorCardStroke">#EDF0F5</color>
+</resources>

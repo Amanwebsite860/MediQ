@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/containerTimeSlot"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/time_slot_height"
+    android:layout_margin="6dp"
+    android:background="@drawable/bg_time_slot"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="center"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/spacing_md"
+    android:paddingEnd="@dimen/spacing_md">
+
+    <TextView
+        android:id="@+id/tvTimeSlot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
+        android:text="09:00 AM"
+        android:textColor="@color/selector_selected_primary_text"
+        android:textSize="@dimen/text_md" />
+
+</LinearLayout>

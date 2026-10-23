@@ -1,0 +1,129 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme -->
+    <style name="Base.Theme.MediQ" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:colorBackground">@color/colorBackground</item>
+        <item name="colorSurface">@color/colorSurface</item>
+        <item name="android:textColorPrimary">@color/colorTextPrimary</item>
+        <item name="android:textColorSecondary">@color/colorTextSecondary</item>
+        <item name="android:textColorHint">@color/colorTextHint</item>
+        <item name="android:statusBarColor">@color/colorPrimary</item>
+        <item name="android:navigationBarColor">@color/colorSurface</item>
+    </style>
+
+    <style name="Theme.MediQ" parent="Base.Theme.MediQ" />
+
+    <!-- Splash Screen Theme (no action bar, full screen) -->
+    <style name="Theme.MediQ.Splash" parent="Theme.MediQ">
+        <item name="android:windowBackground">@color/colorBackground</item>
+        <item name="android:statusBarColor">@color/colorBackground</item>
+    </style>
+
+    <!-- Auth Screen Theme (light status bar) -->
+    <style name="Theme.MediQ.Auth" parent="Theme.MediQ">
+        <item name="android:windowBackground">@color/colorBackgroundLight</item>
+        <item name="android:statusBarColor">@color/colorBackgroundLight</item>
+    </style>
+
+    <!-- Primary Button Style -->
+    <style name="Widget.MediQ.Button.Primary" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/colorPrimary</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="android:minHeight">52dp</item>
+    </style>
+
+    <!-- Outlined Button Style -->
+    <style name="Widget.MediQ.Button.Outlined" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="strokeColor">@color/colorPrimary</item>
+        <item name="android:textColor">@color/colorPrimary</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="android:minHeight">52dp</item>
+    </style>
+
+    <!-- Error Outlined Button Style (Cancel) -->
+    <style name="Widget.MediQ.Button.Cancel" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="strokeColor">@color/colorError</item>
+        <item name="android:textColor">@color/colorError</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="cornerRadius">10dp</item>
+    </style>
+
+    <!-- Text Input Layout Style -->
+    <style name="Widget.MediQ.TextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxCornerRadiusTopStart">12dp</item>
+        <item name="boxCornerRadiusTopEnd">12dp</item>
+        <item name="boxCornerRadiusBottomStart">12dp</item>
+        <item name="boxCornerRadiusBottomEnd">12dp</item>
+        <item name="boxStrokeColor">@color/colorDivider</item>
+        <item name="boxBackgroundColor">@color/colorSurface</item>
+    </style>
+
+    <!-- Card Style -->
+    <style name="Widget.MediQ.CardView" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">2dp</item>
+        <item name="cardBackgroundColor">@color/colorCardBackground</item>
+    </style>
+
+    <!-- Tab Layout Style -->
+    <style name="Widget.MediQ.TabLayout" parent="Widget.Material3.TabLayout">
+        <item name="tabTextColor">@color/colorTextSecondary</item>
+        <item name="tabSelectedTextColor">@color/colorPrimary</item>
+        <item name="tabIndicatorColor">@color/colorPrimary</item>
+        <item name="tabIndicatorFullWidth">false</item>
+    </style>
+
+    <!-- Toolbar Title -->
+    <style name="TextAppearance.MediQ.Toolbar" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:textColor">@color/colorTextPrimary</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Heading -->
+    <style name="TextAppearance.MediQ.Heading" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="android:textColor">@color/colorTextPrimary</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Subheading -->
+    <style name="TextAppearance.MediQ.Subheading" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:textColor">@color/colorTextSecondary</item>
+    </style>
+
+    <!-- Body -->
+    <style name="TextAppearance.MediQ.Body" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:textColor">@color/colorTextPrimary</item>
+    </style>
+
+    <!-- Caption -->
+    <style name="TextAppearance.MediQ.Caption" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:textColor">@color/colorTextSecondary</item>
+    </style>
+
+    <!-- Section title (Swiggy-style bold heading) -->
+    <style name="TextAppearance.MediQ.SectionTitle" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:textColor">@color/colorTextPrimary</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Equal-width tappable pill used on the Emergency screen -->
+    <style name="Widget.MediQ.QuickDial" parent="">
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/bg_chip</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:textColor">@color/colorTextPrimary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+</resources>

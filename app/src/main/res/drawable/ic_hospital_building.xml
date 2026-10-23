@@ -1,0 +1,51 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+    <!-- Sky background -->
+    <path
+        android:fillColor="#E8F0FE"
+        android:pathData="M0,0h120v120H0z"/>
+    <!-- Ground / grass -->
+    <path
+        android:fillColor="#E2F0D9"
+        android:pathData="M0,96h120v24H0z"/>
+    <!-- Shadow / base -->
+    <path
+        android:fillColor="#D0DFE5"
+        android:pathData="M16,96h88v4H16z"/>
+    <!-- Building main block -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M24,28h72v68H24z"/>
+    <!-- Roof trim -->
+    <path
+        android:fillColor="#1976D2"
+        android:pathData="M20,24h80v6H20z"/>
+    <!-- Red Cross emblem circular badge -->
+    <path
+        android:fillColor="#E53935"
+        android:pathData="M60,40m-10,0a10,10 0 1,0 20,0a10,10 0 1,0 -20,0"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M57.5,35h5v10h-5z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M55,37.5h10v5H55z"/>
+    <!-- Windows Row 1 -->
+    <path
+        android:fillColor="#90CAF9"
+        android:pathData="M32,56h10v10H32zM46,56h10v10H46zM64,56h10v10H64zM78,56h10v10H78z"/>
+    <!-- Windows Row 2 -->
+    <path
+        android:fillColor="#90CAF9"
+        android:pathData="M32,72h10v10H32zM46,72h10v10H46zM64,72h10v10H64zM78,72h10v10H78z"/>
+    <!-- Entrance door -->
+    <path
+        android:fillColor="#1565C0"
+        android:pathData="M53,84h14v12H53z"/>
+    <path
+        android:fillColor="#BBDEFB"
+        android:pathData="M55,86h4v10H55zM61,86h4v10H61z"/>
+</vector>

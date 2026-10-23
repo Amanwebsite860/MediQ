@@ -1,0 +1,9 @@
+# Ignore Android app files on Vercel deployment
+app/
+gradle/
+sql/
+.gradle/
+build/
+*.bat
+gradlew
+*.properties

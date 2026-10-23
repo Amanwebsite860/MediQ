@@ -1,0 +1,158 @@
+<resources>
+    <!-- App Name -->
+    <string name="app_name">MediQ</string>
+    <string name="app_tagline">Your Health, Our Priority</string>
+    <string name="app_subtitle_1">Smart Appointments</string>
+    <string name="app_subtitle_2">Shorter Waits</string>
+    <string name="app_subtitle_3">Better Healthcare</string>
+
+    <!-- Auth -->
+    <string name="welcome_back">Welcome Back!</string>
+    <string name="login_subtitle">Login to continue to a healthier you</string>
+    <string name="hint_email_phone">Mobile Number / Email</string>
+    <string name="hint_password">Password</string>
+    <string name="hint_confirm_password">Confirm Password</string>
+    <string name="hint_full_name">Full Name</string>
+    <string name="hint_mobile">Mobile Number</string>
+    <string name="hint_email_optional">Email (Optional)</string>
+    <string name="btn_login">Login</string>
+    <string name="btn_create_account">Create Account</string>
+    <string name="text_or">OR</string>
+    <string name="btn_login_otp">Login with OTP / Magic Link</string>
+    <string name="hint_email_required">Email Address</string>
+    <string name="otp_title">Verify Email</string>
+    <string name="otp_subtitle">We have sent a verification code to your email</string>
+    <string name="otp_enter_code">Enter Verification Code</string>
+    <string name="btn_verify_otp">Verify &amp; Proceed</string>
+    <string name="text_didnt_receive_otp">Didn\'t receive the code?</string>
+    <string name="text_resend_otp">Resend OTP</string>
+    <string name="dialog_magic_link_title">Login via Magic Link</string>
+    <string name="dialog_magic_link_msg">Enter your Gmail to receive a secure login link or OTP code:</string>
+    <string name="btn_send_link">Send Login Code</string>
+    <string name="magic_link_sent_toast">Verification code sent to your Gmail!</string>
+    <string name="signup_verification_msg">Verification code sent! Please verify your email to complete registration.</string>
+    <string name="text_no_account">Don\'t have an account?</string>
+    <string name="text_has_account">Already have an account?</string>
+    <string name="text_forgot_password">Forgot Password?</string>
+    <string name="text_remember_me">Remember me</string>
+    <string name="text_create_account_title">Create Account</string>
+    <string name="text_create_account_subtitle">Fill in your details to get started</string>
+    <string name="text_terms_agree">I agree to the</string>
+    <string name="text_terms_conditions">Terms &amp; Conditions</string>
+
+    <!-- Home -->
+    <string name="home_greeting">Hi, Welcome</string>
+    <string name="home_greeting_subtitle">Let\'s take a step towards better health</string>
+    <string name="home_search_hint">Search hospitals, doctors, or specialties</string>
+    <string name="home_banner_title">Book Appointments\n&amp; Track Your Queue</string>
+    <string name="home_banner_subtitle">Find nearby hospitals, book appointments and check live queue status easily.</string>
+    <string name="label_nearby_hospitals">Nearby Hospitals</string>
+    <string name="label_nearby_hospitals_desc">Find hospitals near you</string>
+    <string name="label_find_doctors">Find Doctors</string>
+    <string name="label_find_doctors_desc">Search by specialty</string>
+    <string name="label_book_appointment">Book Appointment</string>
+    <string name="label_book_appointment_desc">Choose date and time</string>
+    <string name="label_live_queue">Live Queue</string>
+    <string name="label_live_queue_desc">Check your token status</string>
+    <string name="label_my_appointments">My Appointments</string>
+    <string name="label_my_appointments_desc">View upcoming and past visits</string>
+    <string name="label_map_view">Map View</string>
+    <string name="label_map_view_desc">See hospitals on map</string>
+
+    <!-- Bottom Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_appointments">Appointments</string>
+    <string name="nav_explore">Explore</string>
+    <string name="nav_map">Map</string>
+    <string name="nav_profile">Profile</string>
+
+    <!-- Nearby Hospitals -->
+    <string name="title_nearby_hospitals">Nearby Hospitals</string>
+    <string name="hint_search_hospital">Search by name or area</string>
+    <string name="label_open">Open</string>
+    <string name="label_closed">Closed</string>
+    <string name="label_km">km</string>
+
+    <!-- Map View -->
+    <string name="title_map_view">Hospitals Near You</string>
+    <string name="label_your_location">Your Location</string>
+    <string name="btn_view_details">View Details</string>
+
+    <!-- Hospital Details -->
+    <string name="tab_overview">Overview</string>
+    <string name="tab_doctors">Doctors</string>
+    <string name="tab_services">Services</string>
+    <string name="tab_reviews">Reviews</string>
+    <string name="label_address">Address</string>
+    <string name="label_phone">Phone</string>
+    <string name="label_facilities">Facilities</string>
+
+    <!-- Doctor List -->
+    <string name="title_doctors">Doctors</string>
+    <string name="label_available_today">Available Today</string>
+
+    <!-- Doctor Profile -->
+    <string name="tab_about">About</string>
+    <string name="tab_availability">Availability</string>
+    <string name="label_about_doctor">About Doctor</string>
+    <string name="label_consultation_fee">Consultation Fee</string>
+    <string name="label_consultation_time">Consultation Time</string>
+    <string name="label_experience">Experience</string>
+    <string name="label_reviews_count">reviews</string>
+    <string name="label_years_exp">Years Experience</string>
+
+    <!-- Book Appointment -->
+    <string name="title_book_appointment">Book Appointment</string>
+    <string name="label_select_date">Select Date</string>
+    <string name="label_select_time">Select Time Slot</string>
+    <string name="btn_confirm_appointment">Confirm Appointment</string>
+
+    <!-- Appointment Confirmation -->
+    <string name="text_booking_success">Appointment Booked Successfully!</string>
+    <string name="text_token_generated">Your token has been generated.</string>
+    <string name="label_token_number">Token Number</string>
+    <string name="label_date">Date</string>
+    <string name="label_time">Time</string>
+    <string name="label_hospital">Hospital</string>
+    <string name="btn_view_in_appointments">View in Appointments</string>
+    <string name="btn_go_home">Go to Home</string>
+
+    <!-- Live Queue Status -->
+    <string name="title_live_queue">Live Queue Status</string>
+    <string name="label_consultation_in_progress">Consultation in Progress</string>
+    <string name="label_your_token">Your Token</string>
+    <string name="label_patients_ahead">Patients Ahead</string>
+    <string name="label_estimated_wait">Estimated Wait Time</string>
+    <string name="label_minutes">minutes</string>
+    <string name="status_in_consultation">In Consultation</string>
+    <string name="status_your_turn">Your Turn Next</string>
+    <string name="status_waiting">Waiting</string>
+    <string name="queue_disclaimer">Queue position and waiting time are estimates and may change.</string>
+
+    <!-- My Appointments -->
+    <string name="title_my_appointments">My Appointments</string>
+    <string name="tab_upcoming">Upcoming</string>
+    <string name="tab_past">Past</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="label_token">Token:</string>
+
+    <!-- General -->
+    <string name="loading">Loading…</string>
+    <string name="error_generic">Something went wrong. Please try again.</string>
+    <string name="error_network">No internet connection. Please check your network.</string>
+    <string name="btn_retry">Retry</string>
+
+    <!-- v2 additions -->
+    <string name="title_notifications">Notifications</string>
+    <string name="title_saved">Saved</string>
+    <string name="title_emergency">Emergency</string>
+    <string name="status_upcoming">Upcoming</string>
+    <string name="status_cancelled">Cancelled</string>
+    <string name="status_completed">Completed</string>
+    <string name="status_no_show">Missed</string>
+
+    <!-- Password Reset -->
+    <string name="title_reset_password">Reset Password</string>
+    <string name="subtitle_reset_password">Enter the 8-digit verification code sent to your email and set a new password.</string>
+    <string name="btn_reset_password">Reset Password &amp; Sign In</string>
+</resources>

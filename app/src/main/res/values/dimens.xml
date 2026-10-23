@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Spacing -->
+    <dimen name="spacing_xs">4dp</dimen>
+    <dimen name="spacing_sm">8dp</dimen>
+    <dimen name="spacing_md">16dp</dimen>
+    <dimen name="spacing_lg">24dp</dimen>
+    <dimen name="spacing_xl">32dp</dimen>
+    <dimen name="spacing_xxl">48dp</dimen>
+
+    <!-- Card -->
+    <dimen name="card_corner_radius">16dp</dimen>
+    <dimen name="card_elevation">2dp</dimen>
+    <dimen name="card_padding">16dp</dimen>
+
+    <!-- Button -->
+    <dimen name="button_height">52dp</dimen>
+    <dimen name="button_corner_radius">12dp</dimen>
+
+    <!-- Input -->
+    <dimen name="input_corner_radius">12dp</dimen>
+
+    <!-- Avatar -->
+    <dimen name="avatar_small">40dp</dimen>
+    <dimen name="avatar_medium">60dp</dimen>
+    <dimen name="avatar_large">100dp</dimen>
+    <dimen name="avatar_xlarge">120dp</dimen>
+
+    <!-- Icon -->
+    <dimen name="icon_small">20dp</dimen>
+    <dimen name="icon_medium">24dp</dimen>
+    <dimen name="icon_large">48dp</dimen>
+    <dimen name="icon_badge">56dp</dimen>
+
+    <!-- Bottom Navigation -->
+    <dimen name="bottom_nav_height">56dp</dimen>
+
+    <!-- Text -->
+    <dimen name="text_xs">10sp</dimen>
+    <dimen name="text_sm">12sp</dimen>
+    <dimen name="text_md">14sp</dimen>
+    <dimen name="text_lg">16sp</dimen>
+    <dimen name="text_xl">18sp</dimen>
+    <dimen name="text_xxl">20sp</dimen>
+    <dimen name="text_headline">24sp</dimen>
+    <dimen name="text_display">32sp</dimen>
+    <dimen name="text_token">40sp</dimen>
+
+    <!-- Hospital Card Image -->
+    <dimen name="hospital_card_image">80dp</dimen>
+    <dimen name="hospital_detail_image_height">250dp</dimen>
+
+    <!-- Doctor Avatar in List -->
+    <dimen name="doctor_list_avatar">70dp</dimen>
+    <dimen name="doctor_profile_avatar">120dp</dimen>
+
+    <!-- Banner -->
+    <dimen name="home_banner_height">180dp</dimen>
+
+    <!-- Time Slot -->
+    <dimen name="time_slot_height">44dp</dimen>
+    <dimen name="time_slot_corner_radius">10dp</dimen>
+
+    <!-- Date Card -->
+    <dimen name="date_card_width">64dp</dimen>
+    <dimen name="date_card_height">80dp</dimen>
+    <dimen name="date_card_corner_radius">12dp</dimen>
+
+    <!-- Token Card -->
+    <dimen name="token_card_height">100dp</dimen>
+
+    <!-- Toolbar -->
+    <dimen name="toolbar_height">56dp</dimen>
+</resources>

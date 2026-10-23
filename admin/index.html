@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MediQ Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--tx:#14213d;--mut:#6b7280;--pri:#1976d2;--ok:#1ba672;--bad:#e53935;--warn:#f59e0b;--line:#e5e9f2}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1624;--card:#18223a;--tx:#e8edf7;--mut:#9aa6bd;--line:#26334f}}
+*{box-sizing:border-box}body{margin:0;font:14px/1.45 system-ui,sans-serif;background:var(--bg);color:var(--tx)}
+header{display:flex;align-items:center;gap:12px;padding:12px 20px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+header h1{font-size:18px;margin:0;flex:1}main{max-width:1100px;margin:0 auto;padding:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+.stat b{display:block;font-size:26px}.stat span{color:var(--mut)}
+nav{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+button,input,select{font:inherit}button{border:0;border-radius:9px;padding:8px 14px;cursor:pointer;background:var(--pri);color:#fff;font-weight:600}
+button.sec{background:transparent;color:var(--pri);border:1px solid var(--line)}button.sec.on{background:var(--pri);color:#fff}
+button.ok{background:var(--ok)}button.bad{background:var(--bad)}button.warn{background:var(--warn)}
+input,select{padding:9px 11px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--tx);width:100%}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.grow{flex:1}
+.tag{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:700;background:var(--line)}
+.pending{color:var(--warn)}.approved{color:var(--ok)}.rejected{color:var(--bad)}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:4px 12px;margin:10px 0}.kv dt{color:var(--mut)}.kv dd{margin:0;word-break:break-word}
+.imgs{display:flex;gap:8px;overflow-x:auto;margin:8px 0}.imgs img{height:90px;border-radius:10px;border:1px solid var(--line)}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line)}th{color:var(--mut);font-weight:600}
+.login{max-width:380px;margin:12vh auto}.login input{margin-bottom:10px}.err{color:var(--bad);margin-top:8px}.muted{color:var(--mut)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const $ = (s, r=document) => r.querySelector(s);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let sb, me, tab = 'apps', appFilter = 'pending', userFilter = 'all';
+let currentCfg = null;
+
+async function resolveConfig(){
+  // 1. Try Vercel Serverless API (/api/config or ./api/config)
+  for (const endpoint of ['/api/config', 'api/config', './api/config']) {
+    try {
+      const res = await fetch(endpoint);
+      if(res.ok){
+        const data = await res.json();
+        if(data && data.url && data.key && data.key.length >= 20){
+          return { url: data.url, key: data.key, fromEnv: true };
+        }
+      }
+    } catch(e){}
+  }
+
+  // 2. Check localStorage
+  try {
+    const stored = JSON.parse(localStorage.getItem('mediq_admin_cfg') || 'null');
+    if(stored && stored.url && stored.key) return stored;
+  } catch(e){}
+
+  // 3. Fallback defaults from project configuration
+  const defUrl = 'https://ouddhqorzshmuumywxhl.supabase.co';
+  const defKey = 'sb_publishable_ORH7iwG_EtWxES-wZtcmsA_1WmLYaAZ';
+  if(defUrl && defKey){
+    return { url: defUrl, key: defKey, isDefault: true };
+  }
+
+  return null;
+}
+
+// ---------- boot ----------
+(async function(){
+  currentCfg = await resolveConfig();
+  if(!currentCfg) return showConfig();
+  sb = supabase.createClient(currentCfg.url, currentCfg.key);
+  const { data } = await sb.auth.getSession();
+  if(data && data.session) return enter();
+  showLogin();
+})();
+
+function showConfig(msg){
+  $('#app').innerHTML = `<div class="login card"><h2>Connect to Supabase</h2>
+  <p class="muted">Project Settings → API. Use the <b>anon / public</b> key only (never the service_role key).</p>
+  <input id="u" placeholder="Project URL (https://xxxx.supabase.co)" value="https://ouddhqorzshmuumywxhl.supabase.co">
+  <input id="k" placeholder="anon public key" value="sb_publishable_ORH7iwG_EtWxES-wZtcmsA_1WmLYaAZ">
+  <button id="go">Save</button><div class="err">${esc(msg||'')}</div></div>`;
+  $('#go').onclick = () => {
+    const url = $('#u').value.trim(), key = $('#k').value.trim();
+    if(!/^https:\/\/.+\.supabase\.co\/?$/.test(url) || key.length < 20) return showConfig('Check the URL and key.');
+    localStorage.setItem('mediq_admin_cfg', JSON.stringify({url, key})); location.reload();
+  };
+}
+
+function showLogin(msg){
+  const envBadge = currentCfg && currentCfg.fromEnv
+    ? '<div style="margin-bottom:10px"><span class="tag approved">● Auto-connected via Vercel Environment</span></div>'
+    : '';
+  const resetLink = currentCfg && currentCfg.fromEnv
+    ? ''
+    : '<p class="muted"><a href="#" id="reset">Change Supabase project</a></p>';
+
+  $('#app').innerHTML = `<div class="login card"><h2>MediQ Admin</h2>
+  ${envBadge}
+  <input id="e" type="email" placeholder="Admin email"><input id="p" type="password" placeholder="Password">
+  <button id="go" style="width:100%">Sign in</button><div class="err">${esc(msg||'')}</div>
+  ${resetLink}</div>`;
+  const resetBtn = $('#reset');
+  if(resetBtn) resetBtn.onclick = e => { e.preventDefault(); localStorage.removeItem('mediq_admin_cfg'); location.reload(); };
+  $('#go').onclick = async () => {
+    const { error } = await sb.auth.signInWithPassword({ email: $('#e').value.trim(), password: $('#p').value });
+    if(error) return showLogin(error.message);
+    enter();
+  };
+}
+
+async function enter(){
+  const { data: { user } } = await sb.auth.getUser();
+  const { data: prof } = await sb.from('profiles').select('full_name,role').eq('id', user.id).single();
+  if(!prof || prof.role !== 'admin'){ await sb.auth.signOut(); return showLogin('This account is not an admin.'); }
+  me = prof; render();
+}
+
+// ---------- shell ----------
+async function render(){
+  $('#app').innerHTML = `<header><h1>🏥 MediQ Admin</h1><span class="muted">${esc(me.full_name||'')}</span>
+  <button class="sec" id="out">Sign out</button></header><main><div class="stats" id="stats"></div>
+  <nav>${[['apps','Applications'],['hosp','Hospitals'],['users','Users']].map(([k,l])=>
+    `<button class="sec ${tab===k?'on':''}" data-t="${k}">${l}</button>`).join('')}</nav><div id="view">Loading…</div></main>`;
+  $('#out').onclick = async () => { await sb.auth.signOut(); location.reload(); };
+  document.querySelectorAll('nav button').forEach(b => b.onclick = () => { tab = b.dataset.t; render(); });
+  loadStats();
+  ({apps: viewApps, hosp: viewHospitals, users: viewUsers})[tab]();
+}
+
+async function loadStats(){
+  const cnt = async (t, f) => { let q = sb.from(t).select('*', {count:'exact', head:true}); if(f) q = f(q); const {count} = await q; return count ?? 0; };
+  const [pend, hosp, hpend, pat, staff] = await Promise.all([
+    cnt('staff_applications', q => q.eq('status','pending')), cnt('hospitals', q => q.eq('status','approved')),
+    cnt('hospitals', q => q.eq('status','pending')), cnt('profiles', q => q.eq('role','patient')),
+    cnt('profiles', q => q.in('role',['doctor','receptionist']))]);
+  $('#stats').innerHTML = [['Pending applications',pend],['Pending hospitals',hpend],['Live hospitals',hosp],['Patients',pat],['Staff',staff]]
+    .map(([l,n]) => `<div class="card stat"><b>${n}</b><span>${l}</span></div>`).join('');
+}
+
+// ---------- applications ----------
+async function viewApps(){
+  const { data, error } = await sb.from('staff_applications')
+    .select('*, applicant:profiles!user_id(full_name,email,phone), hospitals(*)').order('created_at', {ascending:false});
+  if(error) return $('#view').innerHTML = `<div class="err">${esc(error.message)} — has sql/07 been run?</div>`;
+  const list = data.filter(a => appFilter === 'all' || a.status === appFilter);
+  $('#view').innerHTML = `<div class="row" style="margin-bottom:12px">${['pending','approved','rejected','all'].map(s =>
+    `<button class="sec ${appFilter===s?'on':''}" data-f="${s}">${s}</button>`).join('')}</div>` +
+    (list.length ? list.map(appCard).join('') : '<div class="card muted">Nothing here.</div>');
+  document.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { appFilter = b.dataset.f; viewApps(); });
+  document.querySelectorAll('[data-approve]').forEach(b => b.onclick = () => decide(b.dataset.approve, true));
+  document.querySelectorAll('[data-reject]').forEach(b => b.onclick = () => decide(b.dataset.reject, false));
+}
+
+function kv(pairs){ return '<dl class="kv">' + pairs.filter(p => p[1] !== null && p[1] !== undefined && p[1] !== '')
+  .map(([k,v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('') + '</dl>'; }
+
+function appCard(a){
+  const p = a.applicant || {}, h = a.hospitals || {};
+  const imgs = (h.image_urls || []).filter(u => /^https:\/\//.test(u)).map(u => `<img src="${esc(u)}" alt="">`).join('');
+  return `<div class="card"><div class="row"><h3 class="grow" style="margin:0">${esc(p.full_name||'Unnamed')} · ${esc(a.requested_role)}</h3>
+    <span class="tag ${esc(a.status)}">${esc(a.status)}</span></div>
+    ${kv([['Email',p.email],['Phone',p.phone],['Applied',new Date(a.created_at).toLocaleString()],['License no.',a.license_number],
+      ['Specialty',a.specialty],['Experience',a.experience_years?a.experience_years+' yrs':''],['Fee',a.consultation_fee?'₹'+a.consultation_fee:''],
+      ['Qualification',a.qualification],['Bio',a.bio],['Rejection reason',a.rejection_reason]])}
+    <b>${a.is_new_hospital ? '🆕 New hospital' : 'Existing hospital'}: ${esc(h.name||'—')}</b>
+    ${a.is_new_hospital ? kv([['Type',h.type],['Address',[h.address,h.city,h.state].filter(Boolean).join(', ')],['Phone',h.phone],['Email',h.email],
+      ['Registration no.',h.registration_number],['Hours',h.opening_hours],['Beds',h.bed_count],['Emergency 24x7',h.emergency_24x7?'Yes':'No'],
+      ['Services',(h.facilities||[]).join(', ')],['About',h.description]]) + (imgs ? `<div class="imgs">${imgs}</div>` : '<p class="muted">No photos uploaded.</p>') : ''}
+    ${a.status === 'pending' ? `<div class="row"><button class="ok" data-approve="${esc(a.id)}">Approve</button>
+      <button class="bad" data-reject="${esc(a.id)}">Reject…</button></div>` : ''}</div>`;
+}
+
+async function decide(id, approve){
+  let res;
+  if(approve){ if(!confirm('Approve this application? The user becomes staff right away.')) return;
+    res = await sb.rpc('approve_staff_application', { p_application_id: id }); }
+  else { const reason = prompt('Reason shown to the applicant:'); if(reason === null) return;
+    res = await sb.rpc('reject_staff_application', { p_application_id: id, p_reason: reason }); }
+  if(res.error || res.data?.success === false) alert(res.error?.message || res.data.error);
+  render();
+}
+
+// ---------- hospitals ----------
+async function viewHospitals(){
+  const { data, error } = await sb.from('hospitals').select('id,name,city,status,active,rating,review_count,image_url,phone,emergency_24x7').order('created_at', {ascending:false});
+  if(error) return $('#view').innerHTML = `<div class="err">${esc(error.message)}</div>`;
+  $('#view').innerHTML = `<div class="card" style="overflow-x:auto"><table><tr><th></th><th>Hospital</th><th>City</th><th>Status</th><th>Rating</th><th>Actions</th></tr>` +
+    data.map(h => `<tr><td>${h.image_url && /^https:/.test(h.image_url) ? `<img src="${esc(h.image_url)}" width="54" height="40" style="object-fit:cover;border-radius:8px" alt="">` : '🏥'}</td>
+    <td><b>${esc(h.name)}</b><br><span class="muted">${esc(h.phone||'')}${h.emergency_24x7 ? ' · 24x7 ER' : ''}</span></td><td>${esc(h.city||'')}</td>
+    <td><span class="tag ${esc(h.status)}">${esc(h.status)}</span></td><td>${h.rating ? '★ '+esc(h.rating)+' ('+esc(h.review_count)+')' : '—'}</td>
+    <td class="row">${h.status !== 'approved' ? `<button class="ok" data-hs="approved" data-id="${esc(h.id)}">Approve</button>` : `<button class="warn" data-hs="rejected" data-id="${esc(h.id)}">Suspend</button>`}
+    ${h.status === 'pending' ? `<button class="bad" data-hs="rejected" data-id="${esc(h.id)}">Reject</button>` : ''}</td></tr>`).join('') + '</table></div>';
+  document.querySelectorAll('[data-hs]').forEach(b => b.onclick = async () => {
+    const { data: r, error: e } = await sb.rpc('admin_set_hospital_status', { p_hospital_id: b.dataset.id, p_status: b.dataset.hs });
+    if(e || r?.success === false) alert(e?.message || r.error); render();
+  });
+}
+
+// ---------- users ----------
+async function viewUsers(){
+  let q = sb.from('profiles').select('full_name,email,phone,role,requested_role,created_at').order('created_at', {ascending:false}).limit(300);
+  if(userFilter !== 'all') q = q.eq('role', userFilter);
+  const { data, error } = await q;
+  if(error) return $('#view').innerHTML = `<div class="err">${esc(error.message)}</div>`;
+  $('#view').innerHTML = `<div class="row" style="margin-bottom:12px">${['all','patient','doctor','receptionist','admin'].map(r =>
+    `<button class="sec ${userFilter===r?'on':''}" data-r="${r}">${r}</button>`).join('')}</div>
+    <div class="card" style="overflow-x:auto"><table><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Joined</th></tr>` +
+    data.map(u => `<tr><td>${esc(u.full_name)}</td><td>${esc(u.email)}</td><td>${esc(u.phone||'')}</td>
+    <td>${esc(u.role)}${u.role !== u.requested_role && u.requested_role && u.requested_role !== 'patient' ? ` <span class="muted">(asked: ${esc(u.requested_role)})</span>` : ''}</td>
+    <td>${new Date(u.created_at).toLocaleDateString()}</td></tr>`).join('') + '</table></div>';
+  document.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { userFilter = b.dataset.r; viewUsers(); });
+}
+</script>
+</body>
+</html>
