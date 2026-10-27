@@ -118,13 +118,13 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:hint="• • • • • • • •"
+                        android:hint="• • • • • •"
                         android:inputType="number"
                         android:letterSpacing="0.3"
-                        android:maxLength="8"
+                        android:maxLength="6"
                         android:textColor="@color/colorTextPrimary"
-                        android:textSize="24sp"
-                        android:textStyle="normal" />
+                        android:textSize="26sp"
+                        android:textStyle="bold" />
                 </com.google.android.material.textfield.TextInputLayout>
 
             </LinearLayout>

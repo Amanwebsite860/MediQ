@@ -87,21 +87,36 @@ public class NearbyHospitalsActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {}
         });
+
+        etSearch.setOnEditorActionListener((tv, actionId, ev) -> {
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH
+                    || actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE
+                    || (ev != null && ev.getKeyCode() == android.view.KeyEvent.KEYCODE_ENTER)) {
+                filter(tv.getText().toString());
+                android.view.inputmethod.InputMethodManager imm =
+                        (android.view.inputmethod.InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                if (imm != null) imm.hideSoftInputFromWindow(tv.getWindowToken(), 0);
+                return true;
+            }
+            return false;
+        });
     }
 
     private void requestLocationAndFetch() {
+        // Fetch hospitals immediately so list and search work right away
+        fetchHospitalsFromSupabase();
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             fusedLocationClient.getLastLocation().addOnSuccessListener(this, loc -> {
                 if (loc != null) {
                     userLocation = loc;
+                    recalculateDistances();
                 }
-                fetchHospitalsFromSupabase();
-            }).addOnFailureListener(e -> fetchHospitalsFromSupabase());
+            });
         } else {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQ_LOC);
-            fetchHospitalsFromSupabase();
         }
     }
 
@@ -122,15 +137,18 @@ public class NearbyHospitalsActivity extends AppCompatActivity {
     }
 
     private void filter(String query) {
-        if (query.isEmpty()) {
+        if (query == null || query.trim().isEmpty()) {
             adapter.filterList(hospitalList);
             return;
         }
+        String q = query.toLowerCase(Locale.ROOT).trim();
         List<Hospital> filtered = new ArrayList<>();
         for (Hospital h : hospitalList) {
-            if (h.getName().toLowerCase().contains(query.toLowerCase()) ||
-                h.getAddress().toLowerCase().contains(query.toLowerCase()) ||
-                h.getType().toLowerCase().contains(query.toLowerCase())) {
+            String name = h.getName() != null ? h.getName().toLowerCase(Locale.ROOT) : "";
+            String address = h.getAddress() != null ? h.getAddress().toLowerCase(Locale.ROOT) : "";
+            String type = h.getType() != null ? h.getType().toLowerCase(Locale.ROOT) : "";
+            String city = h.getCity() != null ? h.getCity().toLowerCase(Locale.ROOT) : "";
+            if (name.contains(q) || address.contains(q) || type.contains(q) || city.contains(q)) {
                 filtered.add(h);
             }
         }
@@ -189,7 +207,7 @@ public class NearbyHospitalsActivity extends AppCompatActivity {
                             distanceStr = String.format(Locale.US, "%.1f km", r[0] / 1000f);
                         }
 
-                        loaded.add(new Hospital(
+                        Hospital h = new Hospital(
                                 id,
                                 name,
                                 type != null ? type : "Hospital",
@@ -205,7 +223,16 @@ public class NearbyHospitalsActivity extends AppCompatActivity {
                                 active,
                                 lat,
                                 lng
-                        ));
+                        );
+                        String cover = SupabaseClient.optStringSafe(obj, "image_url");
+                        if (cover == null || cover.trim().isEmpty()) {
+                            JSONArray imgs = obj.optJSONArray("image_urls");
+                            if (imgs != null && imgs.length() > 0) {
+                                cover = imgs.optString(0, null);
+                            }
+                        }
+                        h.setImageUrl(cover);
+                        loaded.add(h);
                     }
 
                     sortHospitalsByDistance(loaded);

@@ -22,6 +22,7 @@ public class Doctor implements Serializable {
     private boolean isAvailableToday;
     private String nextSlotText;
     private String qualification;
+    private String gender;
 
     public Doctor() {
     }
@@ -121,11 +122,44 @@ public class Doctor implements Serializable {
     }
 
     public int getAvatarResId() {
-        return avatarResId;
+        if (avatarResId != 0) return avatarResId;
+        return isFemale() ? com.example.mediq.R.drawable.ic_doctor_female_avatar : com.example.mediq.R.drawable.ic_doctor_male_avatar;
     }
 
     public void setAvatarResId(int avatarResId) {
         this.avatarResId = avatarResId;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public boolean isFemale() {
+        if (gender != null && !gender.trim().isEmpty()) {
+            String g = gender.trim().toLowerCase(java.util.Locale.ROOT);
+            if (g.startsWith("f") || g.contains("female") || g.contains("woman")) return true;
+            if (g.startsWith("m") || g.contains("male") || g.contains("man")) return false;
+        }
+        if (name != null) {
+            String n = name.toLowerCase(java.util.Locale.ROOT);
+            if (n.contains("mrs") || n.contains("ms.") || n.contains("miss")
+                    || n.contains("dr. priya") || n.contains("dr. ananya") || n.contains("dr. sunita")
+                    || n.contains("dr. pooja") || n.contains("dr. neha") || n.contains("dr. kavita")
+                    || n.contains("dr. shalini") || n.contains("dr. ritu") || n.contains("dr. meena")
+                    || n.contains("dr. sneha") || n.contains("dr. swati") || n.contains("dr. anita")
+                    || n.contains("dr. rekha") || n.contains("dr. shweta") || n.contains("dr. tanvi")) {
+                return true;
+            }
+        }
+        if (specialty != null) {
+            String s = specialty.toLowerCase(java.util.Locale.ROOT);
+            if (s.contains("gyne") || s.contains("obstetric")) return true;
+        }
+        return false;
     }
 
     public double getRating() {

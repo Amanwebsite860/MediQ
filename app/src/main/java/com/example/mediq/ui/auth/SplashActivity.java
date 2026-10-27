@@ -29,6 +29,8 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
+        startEntryAnimations();
+
         // Fallback navigation timeout in case network hangs
         splashHandler.postDelayed(() -> {
             if (!navigated && !isFinishing()) {
@@ -37,6 +39,71 @@ public class SplashActivity extends AppCompatActivity {
         }, SPLASH_TIMEOUT_MS);
 
         checkAndRefreshToken();
+    }
+
+    private void startEntryAnimations() {
+        android.view.View cardLogo = findViewById(R.id.cardLogo);
+        android.view.View layoutBrand = findViewById(R.id.layoutBrandName);
+        android.view.View tvTagline = findViewById(R.id.tvTagline);
+        android.view.View layoutFeatures = findViewById(R.id.layoutFeaturesBadge);
+        android.view.View layoutFooter = findViewById(R.id.layoutFooter);
+
+        if (cardLogo != null) {
+            cardLogo.setAlpha(0f);
+            cardLogo.setScaleX(0.75f);
+            cardLogo.setScaleY(0.75f);
+            cardLogo.animate()
+                    .alpha(1f)
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .setDuration(600)
+                    .setInterpolator(new android.view.animation.OvershootInterpolator(1.2f))
+                    .start();
+        }
+
+        if (layoutBrand != null) {
+            layoutBrand.setAlpha(0f);
+            layoutBrand.setTranslationY(24f);
+            layoutBrand.animate()
+                    .alpha(1f)
+                    .translationY(0f)
+                    .setDuration(500)
+                    .setStartDelay(180)
+                    .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                    .start();
+        }
+
+        if (tvTagline != null) {
+            tvTagline.setAlpha(0f);
+            tvTagline.animate()
+                    .alpha(1f)
+                    .setDuration(450)
+                    .setStartDelay(300)
+                    .start();
+        }
+
+        if (layoutFeatures != null) {
+            layoutFeatures.setAlpha(0f);
+            layoutFeatures.setScaleX(0.9f);
+            layoutFeatures.setScaleY(0.9f);
+            layoutFeatures.animate()
+                    .alpha(1f)
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .setDuration(500)
+                    .setStartDelay(420)
+                    .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                    .start();
+        }
+
+        if (layoutFooter != null) {
+            layoutFooter.setAlpha(0f);
+            layoutFooter.animate()
+                    .alpha(1f)
+                    .setDuration(600)
+                    .setStartDelay(500)
+                    .start();
+        }
     }
 
     private void checkAndRefreshToken() {

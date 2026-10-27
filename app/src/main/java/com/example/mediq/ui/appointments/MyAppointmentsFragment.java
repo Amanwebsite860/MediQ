@@ -166,7 +166,7 @@ public class MyAppointmentsFragment extends Fragment {
         SessionManager session = SessionManager.getInstance(requireContext());
         String patientId = session.getUserId();
 
-        String endpoint = "appointments?select=id,status,appointment_date,appointment_time,doctor_id,hospital_id,doctors(name,specialty,avatar_url),hospitals(name),queue_entries(token_number,queue_id)&order=appointment_date.desc,appointment_time.desc";
+        String endpoint = "appointments?select=id,status,appointment_date,appointment_time,doctor_id,hospital_id,doctors(name,specialty,avatar_url,profiles(gender)),hospitals(name),queue_entries(token_number,queue_id)&order=appointment_date.desc,appointment_time.desc";
         if (patientId != null && !patientId.isEmpty()) {
             endpoint += "&patient_id=eq." + patientId;
         }
@@ -218,9 +218,21 @@ public class MyAppointmentsFragment extends Fragment {
                             queueId = SupabaseClient.optStringSafe(qObj, "queue_id");
                         }
 
-                        int avatar = (specialty.toLowerCase().contains("derma") || specialty.toLowerCase().contains("gyne"))
-                                ? R.drawable.ic_doctor_female_avatar
-                                : R.drawable.ic_doctor_male_avatar;
+                        String docGender = null;
+                        if (docObj != null) {
+                            JSONObject p = docObj.optJSONObject("profiles");
+                            if (p != null) docGender = SupabaseClient.optStringSafe(p, "gender");
+                        }
+                        boolean isFemale = false;
+                        if (docGender != null && !docGender.isEmpty()) {
+                            isFemale = docGender.toLowerCase(java.util.Locale.ROOT).startsWith("f");
+                        } else {
+                            String dn = docName != null ? docName.toLowerCase(java.util.Locale.ROOT) : "";
+                            isFemale = dn.contains("mrs") || dn.contains("ms.") || dn.contains("priya") || dn.contains("sunita")
+                                    || dn.contains("ananya") || dn.contains("pooja") || dn.contains("neha")
+                                    || specialty.toLowerCase(java.util.Locale.ROOT).contains("gyne");
+                        }
+                        int avatar = isFemale ? R.drawable.ic_doctor_female_avatar : R.drawable.ic_doctor_male_avatar;
 
                         Appointment appt = new Appointment(
                                 id,

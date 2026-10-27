@@ -145,6 +145,7 @@
                     app:strokeWidth="0dp">
 
                     <LinearLayout
+                        android:id="@+id/card_search_inner"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center_vertical"
@@ -153,6 +154,7 @@
                         android:paddingEnd="12dp">
 
                         <ImageView
+                            android:id="@+id/iv_search_icon"
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:contentDescription="@null"

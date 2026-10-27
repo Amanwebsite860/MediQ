@@ -26,8 +26,8 @@ import org.json.JSONObject;
 /**
  * ResetPasswordActivity provides a complete password recovery screen:
  * - Enter registered email
- * - Request / Resend 8-digit recovery OTP
- * - Enter 8-digit OTP
+ * - Request / Resend 6-digit recovery OTP
+ * - Enter 6-digit OTP
  * - Enter and confirm new password
  * - Verifies OTP via Supabase type="recovery" and updates password via PUT /auth/v1/user
  */
@@ -146,7 +146,7 @@ public class ResetPasswordActivity extends AppCompatActivity {
             @Override
             public void onSuccess(String response) {
                 setLoading(false);
-                ToastUtils.show(ResetPasswordActivity.this, "8-digit OTP sent to " + email);
+                ToastUtils.show(ResetPasswordActivity.this, "6-digit OTP sent to " + email);
                 startResendTimer();
             }
 
@@ -179,10 +179,10 @@ public class ResetPasswordActivity extends AppCompatActivity {
         }
 
         if (TextUtils.isEmpty(code)) {
-            tilOtpCode.setError("Please enter the 8-digit OTP verification code");
+            tilOtpCode.setError("Please enter the 6-digit OTP verification code");
             hasError = true;
-        } else if (code.length() < 6 || code.length() > 8) {
-            tilOtpCode.setError("OTP code must be 6 to 8 digits");
+        } else if (code.length() != 6) {
+            tilOtpCode.setError("OTP code must be 6 digits");
             hasError = true;
         }
 

@@ -164,6 +164,47 @@
                         android:textSize="14sp"
                         tools:text="8+ Years Experience" />
                 </LinearLayout>
+
+                <!-- Badges Row: Gender + Hospital -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <!-- Gender Badge -->
+                    <TextView
+                        android:id="@+id/tvDoctorProfileGenderHeader"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_badge_splash_features"
+                        android:paddingStart="10dp"
+                        android:paddingTop="3dp"
+                        android:paddingEnd="10dp"
+                        android:paddingBottom="3dp"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        tools:text="Female Doctor" />
+
+                    <!-- Hospital Affiliation Pill -->
+                    <TextView
+                        android:id="@+id/tvDoctorProfileHospitalHeader"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_chip"
+                        android:paddingStart="10dp"
+                        android:paddingTop="3dp"
+                        android:paddingEnd="10dp"
+                        android:paddingBottom="3dp"
+                        android:textColor="@color/colorTextSecondary"
+                        android:textSize="12sp"
+                        android:visibility="gone"
+                        tools:text="Apollo Hospital"
+                        tools:visibility="visible" />
+                </LinearLayout>
             </LinearLayout>
 
             <!-- TabLayout -->
@@ -332,6 +373,108 @@
                             android:textSize="17sp"
                             android:textStyle="bold"
                             tools:text="10 - 15 minutes" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Gender Details Row -->
+                <LinearLayout
+                    android:id="@+id/layoutDoctorGenderRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <!-- Icon Container -->
+                    <FrameLayout
+                        android:layout_width="46dp"
+                        android:layout_height="46dp"
+                        android:background="@drawable/bg_icon_rounded_blue">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_person"
+                            app:tint="@color/colorPrimary" />
+                    </FrameLayout>
+
+                    <!-- Text Column -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Gender"
+                            android:textColor="@color/colorTextSecondary"
+                            android:textSize="13sp" />
+
+                        <TextView
+                            android:id="@+id/tvDoctorGender"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:textColor="@color/colorTextPrimary"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            tools:text="Female" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Hospital & Location Row -->
+                <LinearLayout
+                    android:id="@+id/layoutDoctorHospitalRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <!-- Icon Container -->
+                    <FrameLayout
+                        android:layout_width="46dp"
+                        android:layout_height="46dp"
+                        android:background="@drawable/bg_icon_rounded_blue">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_hospital"
+                            app:tint="@color/colorPrimary" />
+                    </FrameLayout>
+
+                    <!-- Text Column -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Hospital Affiliation"
+                            android:textColor="@color/colorTextSecondary"
+                            android:textSize="13sp" />
+
+                        <TextView
+                            android:id="@+id/tvDoctorHospitalDetail"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:textColor="@color/colorTextPrimary"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            tools:text="Apollo Hospital, Patna" />
                     </LinearLayout>
                 </LinearLayout>
 

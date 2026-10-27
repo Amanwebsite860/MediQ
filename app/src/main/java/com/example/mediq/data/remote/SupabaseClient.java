@@ -281,7 +281,7 @@ public class SupabaseClient {
     }
 
     /**
-     * Sends Magic Link / OTP via POST /auth/v1/otp with create_user=false for login
+     * Sends OTP via POST /auth/v1/otp with create_user=false for login
      */
     public void signInWithOtp(String email, Callback callback) {
         signInWithOtp(email, false, callback);

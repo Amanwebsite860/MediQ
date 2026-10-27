@@ -84,7 +84,7 @@ public class LoginActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(String response) {
                     setLoading(false);
-                    com.example.mediq.util.ToastUtils.show(LoginActivity.this, "8-digit OTP sent to " + email);
+                    com.example.mediq.util.ToastUtils.show(LoginActivity.this, "6-digit OTP sent to " + email);
                     Intent intent = new Intent(LoginActivity.this, ResetPasswordActivity.class);
                     intent.putExtra(ResetPasswordActivity.EXTRA_EMAIL, email);
                     intent.putExtra(ResetPasswordActivity.EXTRA_AUTO_SENT, true);

@@ -72,10 +72,14 @@ public class HospitalFormActivity extends AppCompatActivity {
     private ChipGroup chipGroup;
     private TextView tvLocation;
     private MaterialButton btnSubmit;
-    private MaterialSwitch switchEmergency;
+    private MaterialSwitch switchEmergency, switch24Hours;
+    private View layoutTimePickers;
     private AutoCompleteTextView actvType;
     private TextInputEditText etName, etReg, etYear, etBeds, etDesc, etAddress, etCity, etState, etPhone,
-            etEmail, etWebsite, etHours, etEmergencyPhone;
+            etEmail, etWebsite, etEmergencyPhone, etOpeningTime, etClosingTime;
+    private TextView tvLiveHoursStatus;
+    private int openHour = 8, openMinute = 0;
+    private int closeHour = 20, closeMinute = 0;
 
     private final ActivityResultLauncher<String> pickPhoto =
             registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
@@ -130,8 +134,24 @@ public class HospitalFormActivity extends AppCompatActivity {
         etPhone = findViewById(R.id.etHPhone);
         etEmail = findViewById(R.id.etHEmail);
         etWebsite = findViewById(R.id.etHWebsite);
-        etHours = findViewById(R.id.etHHours);
         etEmergencyPhone = findViewById(R.id.etHEmergencyPhone);
+
+        switch24Hours = findViewById(R.id.switch24Hours);
+        layoutTimePickers = findViewById(R.id.layoutTimePickers);
+        etOpeningTime = findViewById(R.id.etOpeningTime);
+        etClosingTime = findViewById(R.id.etClosingTime);
+        tvLiveHoursStatus = findViewById(R.id.tvLiveHoursStatus);
+
+        View.OnClickListener pickOpen = v -> showTimePicker(true);
+        etOpeningTime.setOnClickListener(pickOpen);
+        findViewById(R.id.tilOpeningTime).setOnClickListener(pickOpen);
+
+        View.OnClickListener pickClose = v -> showTimePicker(false);
+        etClosingTime.setOnClickListener(pickClose);
+        findViewById(R.id.tilClosingTime).setOnClickListener(pickClose);
+
+        switch24Hours.setOnCheckedChangeListener((btn, isChecked) -> updateHoursDisplay());
+        updateHoursDisplay();
 
         actvType.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, TYPES));
         for (String f : FACILITIES) {
@@ -244,7 +264,8 @@ public class HospitalFormActivity extends AppCompatActivity {
                     set(etName, h, "name"); set(etReg, h, "registration_number"); set(etYear, h, "established_year");
                     set(etBeds, h, "bed_count"); set(etDesc, h, "description"); set(etAddress, h, "address");
                     set(etCity, h, "city"); set(etState, h, "state"); set(etPhone, h, "phone"); set(etEmail, h, "email");
-                    set(etWebsite, h, "website"); set(etHours, h, "opening_hours"); set(etEmergencyPhone, h, "emergency_phone");
+                    set(etWebsite, h, "website"); set(etEmergencyPhone, h, "emergency_phone");
+                    parseAndSetOpeningHours(SupabaseClient.optStringSafe(h, "opening_hours"));
                     String type = SupabaseClient.optStringSafe(h, "type");
                     if (type != null) actvType.setText(type, false);
                     switchEmergency.setChecked(h.optBoolean("emergency_24x7", false));
@@ -334,7 +355,7 @@ public class HospitalFormActivity extends AppCompatActivity {
         h.put("email", t(etEmail));
         h.put("website", t(etWebsite));
         h.put("registration_number", t(etReg));
-        h.put("opening_hours", t(etHours));
+        h.put("opening_hours", getFormattedOpeningHours());
         h.put("description", t(etDesc));
         h.put("established_year", t(etYear));
         h.put("bed_count", t(etBeds));
@@ -350,6 +371,11 @@ public class HospitalFormActivity extends AppCompatActivity {
         JSONArray imgs = new JSONArray();
         for (String u : urls) imgs.put(u);
         h.put("image_urls", imgs);
+        if (urls != null && !urls.isEmpty()) {
+            h.put("image_url", urls.get(0));
+        } else {
+            h.put("image_url", JSONObject.NULL);
+        }
         return h;
     }
 
@@ -389,6 +415,11 @@ public class HospitalFormActivity extends AppCompatActivity {
                 if (lat != null && lon != null) { patch.put("latitude", lat); patch.put("longitude", lon); }
                 patch.put("facilities", h.getJSONArray("facilities"));
                 patch.put("image_urls", h.getJSONArray("image_urls"));
+                if (urls != null && !urls.isEmpty()) {
+                    patch.put("image_url", urls.get(0));
+                } else {
+                    patch.put("image_url", JSONObject.NULL);
+                }
                 SupabaseClient.getInstance().patch("hospitals?id=eq." + hospitalId, patch, new SupabaseClient.Callback() {
                     @Override public void onSuccess(String r) {
                         ToastUtils.show(HospitalFormActivity.this, "Hospital details saved");
@@ -406,5 +437,121 @@ public class HospitalFormActivity extends AppCompatActivity {
         ToastUtils.show(this, msg);
         btnSubmit.setEnabled(true);
         btnSubmit.setText(mode == MODE_EDIT ? "Save changes" : "Submit for approval");
+    }
+
+    // ------------------------------------------------------------------ hours & status
+    private void showTimePicker(boolean isOpening) {
+        int initialHour = isOpening ? openHour : closeHour;
+        int initialMinute = isOpening ? openMinute : closeMinute;
+        String title = isOpening ? "Select Opening Time" : "Select Closing Time";
+
+        com.google.android.material.timepicker.MaterialTimePicker picker =
+                new com.google.android.material.timepicker.MaterialTimePicker.Builder()
+                        .setTimeFormat(com.google.android.material.timepicker.TimeFormat.CLOCK_12H)
+                        .setHour(initialHour)
+                        .setMinute(initialMinute)
+                        .setTitleText(title)
+                        .build();
+
+        picker.addOnPositiveButtonClickListener(v -> {
+            if (isOpening) {
+                openHour = picker.getHour();
+                openMinute = picker.getMinute();
+            } else {
+                closeHour = picker.getHour();
+                closeMinute = picker.getMinute();
+            }
+            updateHoursDisplay();
+        });
+
+        picker.show(getSupportFragmentManager(), isOpening ? "PICK_OPEN_TIME" : "PICK_CLOSE_TIME");
+    }
+
+    private void updateHoursDisplay() {
+        boolean is24Hours = switch24Hours != null && switch24Hours.isChecked();
+        if (layoutTimePickers != null) {
+            layoutTimePickers.setVisibility(is24Hours ? View.GONE : View.VISIBLE);
+        }
+        if (etOpeningTime != null) {
+            etOpeningTime.setText(formatTime(openHour, openMinute));
+        }
+        if (etClosingTime != null) {
+            etClosingTime.setText(formatTime(closeHour, closeMinute));
+        }
+        updateStatusPreview();
+    }
+
+    private String formatTime(int hour, int minute) {
+        int h12 = hour % 12 == 0 ? 12 : hour % 12;
+        String amPm = hour >= 12 ? "PM" : "AM";
+        return String.format(java.util.Locale.US, "%02d:%02d %s", h12, minute, amPm);
+    }
+
+    private String getFormattedOpeningHours() {
+        if (switch24Hours != null && switch24Hours.isChecked()) {
+            return "Open 24 Hours";
+        }
+        return formatTime(openHour, openMinute) + " - " + formatTime(closeHour, closeMinute);
+    }
+
+    private void updateStatusPreview() {
+        if (tvLiveHoursStatus == null) return;
+        String formattedHours = getFormattedOpeningHours();
+        com.example.mediq.util.OpeningHours.Status status = com.example.mediq.util.OpeningHours.status(formattedHours);
+        tvLiveHoursStatus.setText(status.text);
+        boolean closed = status.known && !status.open;
+        tvLiveHoursStatus.setBackgroundResource(closed ? R.drawable.bg_badge_closed : R.drawable.bg_badge_success);
+        tvLiveHoursStatus.setTextColor(ContextCompat.getColor(this, closed ? R.color.colorSos : R.color.colorSuccess));
+    }
+
+    private void parseAndSetOpeningHours(String raw) {
+        if (raw == null || raw.trim().isEmpty()) {
+            openHour = 8; openMinute = 0;
+            closeHour = 20; closeMinute = 0;
+            if (switch24Hours != null) switch24Hours.setChecked(false);
+            updateHoursDisplay();
+            return;
+        }
+        String s = raw.toLowerCase(java.util.Locale.ROOT).trim();
+        if (s.contains("24") || s.contains("round the clock")) {
+            if (switch24Hours != null) switch24Hours.setChecked(true);
+            updateHoursDisplay();
+            return;
+        }
+
+        java.util.regex.Pattern p = java.util.regex.Pattern.compile(
+                "(\\d{1,2})(?::(\\d{2}))?\\s*(am|pm)?\\s*(?:-|–|—|to)\\s*(\\d{1,2})(?::(\\d{2}))?\\s*(am|pm)?");
+        java.util.regex.Matcher m = p.matcher(s);
+        if (m.find()) {
+            try {
+                int h1 = Integer.parseInt(m.group(1));
+                int m1 = m.group(2) == null ? 0 : Integer.parseInt(m.group(2));
+                String ap1 = m.group(3);
+
+                int h2 = Integer.parseInt(m.group(4));
+                int m2 = m.group(5) == null ? 0 : Integer.parseInt(m.group(5));
+                String ap2 = m.group(6);
+
+                if (ap2 == null && ap1 != null) ap2 = ap1;
+                if (ap1 == null && ap2 != null) {
+                    ap1 = (h1 >= 7 && h1 <= 11) ? "am" : ap2;
+                }
+
+                if (ap1 != null) {
+                    h1 = (h1 % 12) + ("pm".equalsIgnoreCase(ap1) ? 12 : 0);
+                }
+                if (ap2 != null) {
+                    h2 = (h2 % 12) + ("pm".equalsIgnoreCase(ap2) ? 12 : 0);
+                }
+
+                openHour = Math.max(0, Math.min(23, h1));
+                openMinute = Math.max(0, Math.min(59, m1));
+                closeHour = Math.max(0, Math.min(23, h2));
+                closeMinute = Math.max(0, Math.min(59, m2));
+            } catch (Exception ignored) { }
+        }
+
+        if (switch24Hours != null) switch24Hours.setChecked(false);
+        updateHoursDisplay();
     }
 }

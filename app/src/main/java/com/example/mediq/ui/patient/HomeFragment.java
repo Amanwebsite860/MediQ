@@ -112,6 +112,13 @@ public class HomeFragment extends Fragment {
     private void initSearchAndShortcuts(View view) {
         View.OnClickListener openSearch = v -> startActivity(new Intent(requireContext(), SearchActivity.class));
         view.findViewById(R.id.card_search).setOnClickListener(openSearch);
+        View inner = view.findViewById(R.id.card_search_inner);
+        if (inner != null) inner.setOnClickListener(openSearch);
+        View placeholder = view.findViewById(R.id.tv_search_placeholder);
+        if (placeholder != null) placeholder.setOnClickListener(openSearch);
+        View icon = view.findViewById(R.id.iv_search_icon);
+        if (icon != null) icon.setOnClickListener(openSearch);
+
         view.findViewById(R.id.btn_filter).setOnClickListener(v -> startActivity(
                 new Intent(requireContext(), SearchActivity.class).putExtra(SearchActivity.EXTRA_OPEN_FILTERS, true)));
         view.findViewById(R.id.cardSos).setOnClickListener(v ->
@@ -183,7 +190,14 @@ public class HomeFragment extends Fragment {
                                         SupabaseClient.optStringSafe(o, "opening_hours"),
                                         null, R.drawable.ic_hospital_building,
                                         o.optDouble("rating", 0), o.optInt("review_count", 0), true, lat, lon);
-                                h.setImageUrl(SupabaseClient.optStringSafe(o, "image_url"));
+                                String cover = SupabaseClient.optStringSafe(o, "image_url");
+                                if (cover == null || cover.trim().isEmpty()) {
+                                    org.json.JSONArray imgs = o.optJSONArray("image_urls");
+                                    if (imgs != null && imgs.length() > 0) {
+                                        cover = imgs.optString(0, null);
+                                    }
+                                }
+                                h.setImageUrl(cover);
                                 hospitals.add(h);
                             }
                             if (lastLocation != null) {
@@ -372,6 +386,8 @@ public class HomeFragment extends Fragment {
             ImageView iv = card.findViewById(R.id.ivHospitalImage);
             if (h.getImageUrl() != null && !h.getImageUrl().isEmpty()) {
                 Glide.with(this).load(h.getImageUrl()).placeholder(R.drawable.ic_hospital_building).into(iv);
+            } else {
+                iv.setImageResource(R.drawable.ic_hospital_building);
             }
             CardBinder.bindHospitalHeart(card, h);
             card.setOnClickListener(v -> {

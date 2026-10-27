@@ -5,7 +5,9 @@
     <color name="colorPrimaryDark">#1565C0</color>
     <color name="colorPrimaryLight">#42A5F5</color>
     <color name="colorAccent">#2196F3</color>
-    <color name="colorLogoGreen">#00C853</color>
+    <color name="colorLogoGreen">#2987D9</color>
+    <color name="colorLogoCyan">#2987D9</color>
+    <color name="colorLogoNavy">#155893</color>
     <color name="colorGoogleText">#374151</color>
 
     <!-- Background & Surface -->

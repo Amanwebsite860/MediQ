@@ -105,7 +105,14 @@ public class FavoritesActivity extends AppCompatActivity {
                                         null, R.drawable.ic_hospital_building,
                                         o.optDouble("rating", 0), o.optInt("review_count", 0), true,
                                         o.optDouble("latitude", 0), o.optDouble("longitude", 0));
-                                h.setImageUrl(SupabaseClient.optStringSafe(o, "image_url"));
+                                String cover = SupabaseClient.optStringSafe(o, "image_url");
+                                if (cover == null || cover.trim().isEmpty()) {
+                                    org.json.JSONArray imgs = o.optJSONArray("image_urls");
+                                    if (imgs != null && imgs.length() > 0) {
+                                        cover = imgs.optString(0, null);
+                                    }
+                                }
+                                h.setImageUrl(cover);
                                 hospitals.add(h);
                             }
                         } catch (Exception ignored) { }
@@ -143,6 +150,8 @@ public class FavoritesActivity extends AppCompatActivity {
                 ImageView iv = card.findViewById(R.id.ivHospitalImage);
                 if (h.getImageUrl() != null && !h.getImageUrl().isEmpty()) {
                     Glide.with(this).load(h.getImageUrl()).placeholder(R.drawable.ic_hospital_building).into(iv);
+                } else {
+                    iv.setImageResource(R.drawable.ic_hospital_building);
                 }
                 CardBinder.bindHospitalHeart(card, h);
                 card.setOnClickListener(v -> {

@@ -31,7 +31,7 @@ public final class DoctorRepository {
 
     /** @param filterQuery extra PostgREST filters, e.g. "&hospital_id=eq.123" (may be empty) */
     public static void load(String filterQuery, Result cb) {
-        String q = "doctors?select=*,hospitals(name)&active=eq.true&order=rating.desc"
+        String q = "doctors?select=*,hospitals(name),profiles(gender)&active=eq.true&order=rating.desc"
                 + (filterQuery == null ? "" : filterQuery);
         SupabaseClient.getInstance().get(q, new SupabaseClient.Callback() {
             @Override public void onSuccess(String json) {
@@ -88,11 +88,15 @@ public final class DoctorRepository {
             JSONObject o = arr.getJSONObject(i);
             String specialty = SupabaseClient.optStringSafe(o, "specialty");
             String sp = specialty == null ? "" : specialty.toLowerCase(Locale.ROOT);
-            int avatarRes = (sp.contains("derma") || sp.contains("gyne"))
-                    ? R.drawable.ic_doctor_female_avatar : R.drawable.ic_doctor_male_avatar;
             String hospitalName = null;
             JSONObject h = o.optJSONObject("hospitals");
             if (h != null) hospitalName = SupabaseClient.optStringSafe(h, "name");
+
+            String gender = SupabaseClient.optStringSafe(o, "gender");
+            if (gender == null || gender.isEmpty()) {
+                JSONObject p = o.optJSONObject("profiles");
+                if (p != null) gender = SupabaseClient.optStringSafe(p, "gender");
+            }
 
             Doctor d = new Doctor(
                     SupabaseClient.optStringSafe(o, "id"),
@@ -103,13 +107,15 @@ public final class DoctorRepository {
                     (int) o.optDouble("consultation_fee", 300),
                     o.optInt("consultation_duration_min", 15),
                     SupabaseClient.optStringSafe(o, "avatar_url"),
-                    avatarRes,
+                    0,
                     o.optDouble("rating", 0),
                     o.optInt("review_count", 0),
                     hospitalName,
                     SupabaseClient.optStringSafe(o, "hospital_id"),
                     true);
             d.setQualification(SupabaseClient.optStringSafe(o, "qualification"));
+            d.setGender(gender);
+            d.setAvatarResId(d.getAvatarResId());
             out.add(d);
         }
         return out;

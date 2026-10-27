@@ -93,7 +93,7 @@ public class MapViewActivity extends AppCompatActivity {
         map = findViewById(R.id.map);
         map.setTileSource(TileSourceFactory.MAPNIK);
         map.setMultiTouchControls(true);
-        map.getController().setZoom(14.0);
+        map.getController().setZoom(13.0);
         map.getController().setCenter(new GeoPoint(FALLBACK_LAT, FALLBACK_LON));
 
         btnBack = findViewById(R.id.btnBack);
@@ -120,8 +120,24 @@ public class MapViewActivity extends AppCompatActivity {
         setupChipFilters();
 
         etMapSearch = findViewById(R.id.etMapSearch);
+        etMapSearch.addTextChangedListener(new android.text.TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int count, int after) {
+                String text = s != null ? s.toString().trim() : "";
+                if (text.length() >= 2) {
+                    runMapSearch(text);
+                } else if (text.isEmpty()) {
+                    runMapSearch("");
+                }
+            }
+            @Override public void afterTextChanged(android.text.Editable s) {}
+        });
+
         etMapSearch.setOnEditorActionListener((tv, actionId, ev) -> {
-            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH) {
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH
+                    || actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE
+                    || actionId == android.view.inputmethod.EditorInfo.IME_ACTION_GO
+                    || (ev != null && ev.getKeyCode() == android.view.KeyEvent.KEYCODE_ENTER)) {
                 runMapSearch(tv.getText().toString().trim());
                 android.view.inputmethod.InputMethodManager imm =
                         (android.view.inputmethod.InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
@@ -238,10 +254,10 @@ public class MapViewActivity extends AppCompatActivity {
         // 1. MediQ partner hospitals (Bookable with queues)
         fetchPartnerHospitals(true);
 
-        // 2. Real nearby clinics and pharmacies from OpenStreetMap Overpass
+        // 2. Real nearby clinics and pharmacies from OpenStreetMap Overpass (15 km radius)
         io.execute(() -> {
             try {
-                List<OverpassClient.Place> places = OverpassClient.fetch(lat, lon, 4000);
+                List<OverpassClient.Place> places = OverpassClient.fetch(lat, lon, 15000);
                 runOnUiThread(() -> { if (!isFinishing()) addOsmMarkers(places); });
             } catch (Exception ignored) {
             }
@@ -313,7 +329,14 @@ public class MapViewActivity extends AppCompatActivity {
                         lon
                 );
 
-                hospObj.setImageUrl(SupabaseClient.optStringSafe(h, "image_url"));
+                String cover = SupabaseClient.optStringSafe(h, "image_url");
+                if (cover == null || cover.trim().isEmpty()) {
+                    org.json.JSONArray imgs = h.optJSONArray("image_urls");
+                    if (imgs != null && imgs.length() > 0) {
+                        cover = imgs.optString(0, null);
+                    }
+                }
+                hospObj.setImageUrl(cover);
 
                 m.setOnMarkerClickListener((mk, mv) -> {
                     select(mk);
@@ -413,14 +436,20 @@ public class MapViewActivity extends AppCompatActivity {
         showCard(info != null ? info[0] : "", info != null ? info[1] : "", m.getPosition(), h != null, h);
     }
 
-    /** Search box: first a hospital / pharmacy by name, otherwise an area name. */
+    /** Search box: first a hospital / pharmacy by name or type, otherwise an area name. */
     private void runMapSearch(String q) {
-        if (q.isEmpty()) return;
-        String needle = q.toLowerCase(Locale.ROOT);
+        if (q == null || q.trim().isEmpty()) {
+            int checkedId = chipGroupMap != null && !chipGroupMap.getCheckedChipIds().isEmpty()
+                    ? chipGroupMap.getCheckedChipIds().get(0) : R.id.chipAll;
+            applyMarkerFilter(checkedId);
+            return;
+        }
+        String needle = q.toLowerCase(Locale.ROOT).trim();
         Marker best = null;
         for (Map.Entry<Marker, String[]> e : placeInfo.entrySet()) {
             String name = e.getValue()[0] == null ? "" : e.getValue()[0].toLowerCase(Locale.ROOT);
-            if (!name.contains(needle)) continue;
+            String type = (e.getValue().length > 1 && e.getValue()[1] != null) ? e.getValue()[1].toLowerCase(Locale.ROOT) : "";
+            if (!name.contains(needle) && !type.contains(needle)) continue;
             // MediQ hospitals win over OpenStreetMap places
             if (best == null || (hospitalOf.containsKey(e.getKey()) && !hospitalOf.containsKey(best))) best = e.getKey();
         }
@@ -562,7 +591,7 @@ public class MapViewActivity extends AppCompatActivity {
             findViewById(R.id.btnCardDirections).setOnClickListener(v -> openDirections(name, pos));
         } else {
             ratingRow.setVisibility(View.GONE);
-            ivPhoto.setImageResource(R.drawable.ic_hospital);
+            ivPhoto.setImageResource(R.drawable.ic_hospital_building);
             actions.setVisibility(View.GONE);
         }
 

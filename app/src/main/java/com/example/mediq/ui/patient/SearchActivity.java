@@ -128,6 +128,18 @@ public class SearchActivity extends AppCompatActivity implements SearchFeedAdapt
             }
             @Override public void afterTextChanged(Editable s) { }
         });
+        etSearch.setOnEditorActionListener((tv, actionId, event) -> {
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH
+                    || actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE
+                    || (event != null && event.getKeyCode() == android.view.KeyEvent.KEYCODE_ENTER)) {
+                applyFiltersAndSort();
+                android.view.inputmethod.InputMethodManager imm =
+                        (android.view.inputmethod.InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                if (imm != null) imm.hideSoftInputFromWindow(tv.getWindowToken(), 0);
+                return true;
+            }
+            return false;
+        });
         btnOpenFilters.setOnClickListener(v -> showFilterSheet());
         tvResetFilters.setOnClickListener(v -> { etSearch.setText(""); f.reset(); applyFiltersAndSort(); });
 
@@ -169,15 +181,32 @@ public class SearchActivity extends AppCompatActivity implements SearchFeedAdapt
     // ------------------------------------------------------------------ data
     private void loadLocationThenData() {
         progressBar.setVisibility(View.VISIBLE);
+        // Start loading data immediately so search works without waiting for GPS
+        loadHospitals();
+
         boolean granted = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                 || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-        if (!granted) { loadHospitals(); return; }
+        if (!granted) return;
         try {
             LocationServices.getFusedLocationProviderClient(this).getLastLocation()
-                    .addOnSuccessListener(l -> { myLocation = l; loadHospitals(); })
-                    .addOnFailureListener(e -> loadHospitals());
-        } catch (SecurityException e) {
-            loadHospitals();
+                    .addOnSuccessListener(l -> {
+                        if (l != null) {
+                            myLocation = l;
+                            recalculateDistances();
+                            applyFiltersAndSort();
+                        }
+                    });
+        } catch (SecurityException ignored) { }
+    }
+
+    private void recalculateDistances() {
+        if (myLocation == null) return;
+        for (Hospital h : allHospitals) {
+            if (h.getLatitude() != 0 || h.getLongitude() != 0) {
+                double km = UiUtils.distanceKm(myLocation.getLatitude(), myLocation.getLongitude(), h.getLatitude(), h.getLongitude());
+                distanceKm.put(h.getId(), km);
+                h.setDistance(String.format(Locale.US, "%.1f km", km));
+            }
         }
     }
 
@@ -209,7 +238,14 @@ public class SearchActivity extends AppCompatActivity implements SearchFeedAdapt
                                         SupabaseClient.optStringSafe(o, "opening_hours"),
                                         null, R.drawable.ic_hospital_building,
                                         o.optDouble("rating", 0), o.optInt("review_count", 0), true, lat, lon);
-                                h.setImageUrl(SupabaseClient.optStringSafe(o, "image_url"));
+                                String cover = SupabaseClient.optStringSafe(o, "image_url");
+                                if (cover == null || cover.trim().isEmpty()) {
+                                    org.json.JSONArray imgs = o.optJSONArray("image_urls");
+                                    if (imgs != null && imgs.length() > 0) {
+                                        cover = imgs.optString(0, null);
+                                    }
+                                }
+                                h.setImageUrl(cover);
                                 allHospitals.add(h);
                             }
                         } catch (Exception ignored) { }
@@ -236,10 +272,24 @@ public class SearchActivity extends AppCompatActivity implements SearchFeedAdapt
 
     // ------------------------------------------------------------------ filtering
     private boolean matchesQuery(String q, String... fields) {
-        if (q.isEmpty()) return true;
+        if (q == null || q.trim().isEmpty()) return true;
+        String cleanQ = q.toLowerCase(Locale.ROOT).replaceAll("[.,\\-–—_#@!?:;]", " ").trim();
+        if (cleanQ.isEmpty()) return true;
+
         StringBuilder all = new StringBuilder();
-        for (String s : fields) if (s != null) all.append(s.toLowerCase(Locale.ROOT)).append(' ');
-        for (String word : q.split("\\s+")) if (!all.toString().contains(word)) return false;
+        for (String s : fields) {
+            if (s != null) {
+                all.append(s.toLowerCase(Locale.ROOT).replaceAll("[.,\\-–—_#@!?:;]", " ")).append(' ');
+            }
+        }
+        String corpus = all.toString();
+        for (String word : cleanQ.split("\\s+")) {
+            if (word.isEmpty()) continue;
+            if ((word.equals("dr") || word.equals("doctor")) && !corpus.contains("dr") && !corpus.contains("doctor")) {
+                continue;
+            }
+            if (!corpus.contains(word)) return false;
+        }
         return true;
     }
 
@@ -249,7 +299,7 @@ public class SearchActivity extends AppCompatActivity implements SearchFeedAdapt
     }
 
     private void applyFiltersAndSort() {
-        String q = etSearch.getText().toString().trim().toLowerCase(Locale.ROOT);
+        String q = etSearch.getText() != null ? etSearch.getText().toString().trim() : "";
 
         // hospitals that have at least one doctor in the selected specialties
         Set<String> hospitalsWithSpecialty = new HashSet<>();
@@ -274,12 +324,25 @@ public class SearchActivity extends AppCompatActivity implements SearchFeedAdapt
         List<Doctor> doctors = new ArrayList<>();
         if (f.type != TYPE_HOSPITALS && !f.emergency) {
             for (Doctor d : allDoctors) {
-                if (!matchesQuery(q, d.getName(), d.getSpecialty(), d.getHospitalName(), d.getQualification())) continue;
+                if (!matchesQuery(q, d.getName(), d.getSpecialty(), d.getHospitalName(), d.getQualification(), d.getBio())) continue;
                 if (d.getRating() < f.minRating) continue;
                 if (f.maxFee > 0 && d.getConsultationFee() > f.maxFee) continue;
                 if (f.availToday && !d.isAvailableToday()) continue;
                 if (!f.specialties.isEmpty() && !specialtySelected(d)) continue;
                 doctors.add(d);
+            }
+        }
+
+        // If query was typed and current tab had no results, show results from the other category
+        if (!q.isEmpty() && f.type == TYPE_HOSPITALS && hospitals.isEmpty()) {
+            for (Doctor d : allDoctors) {
+                if (!matchesQuery(q, d.getName(), d.getSpecialty(), d.getHospitalName(), d.getQualification(), d.getBio())) continue;
+                doctors.add(d);
+            }
+        } else if (!q.isEmpty() && f.type == TYPE_DOCTORS && doctors.isEmpty()) {
+            for (Hospital h : allHospitals) {
+                if (!matchesQuery(q, h.getName(), h.getType(), h.getAddress(), h.getCity())) continue;
+                hospitals.add(h);
             }
         }
 
@@ -303,9 +366,9 @@ public class SearchActivity extends AppCompatActivity implements SearchFeedAdapt
 
         displayList.clear();
         int max = Math.max(hospitals.size(), doctors.size());
-        if (f.type == TYPE_HOSPITALS) {
+        if (f.type == TYPE_HOSPITALS && !hospitals.isEmpty()) {
             for (Hospital h : hospitals) displayList.add(new SearchFeedItem(h));
-        } else if (f.type == TYPE_DOCTORS) {
+        } else if (f.type == TYPE_DOCTORS && !doctors.isEmpty()) {
             for (Doctor d : doctors) displayList.add(new SearchFeedItem(d));
         } else {
             for (int i = 0; i < max; i++) { // a few hospitals, then doctors, and repeat

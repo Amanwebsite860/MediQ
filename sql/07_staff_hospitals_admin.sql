@@ -364,6 +364,9 @@ BEGIN
                     COALESCE(v_app.specialty, 'General Physician'), v_app.bio,
                     v_app.experience_years, v_app.consultation_fee, TRUE);
         END IF;
+
+        -- Auto-generate consultation schedule shifts for the next 30 days
+        PERFORM generate_future_schedules(30);
     END IF;
 
     UPDATE staff_applications SET status = 'approved', reviewed_at = NOW(), reviewed_by = auth.uid(),

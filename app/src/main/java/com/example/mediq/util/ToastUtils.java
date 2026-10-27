@@ -29,10 +29,10 @@ public class ToastUtils {
             View rootView = activity.findViewById(android.R.id.content);
             if (rootView != null) {
                 Snackbar snackbar = Snackbar.make(rootView, message, Snackbar.LENGTH_LONG);
-                snackbar.setDuration(4000); // 4 seconds for easy reading
+                snackbar.setDuration(2200); // Snappy 2.2s display
                 snackbar.show();
             } else {
-                Toast.makeText(activity, message, Toast.LENGTH_LONG).show();
+                Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -41,7 +41,7 @@ public class ToastUtils {
         if (context instanceof Activity) {
             show((Activity) context, message);
         } else if (context != null && message != null && !message.trim().isEmpty()) {
-            Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
         }
     }
 }

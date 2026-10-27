@@ -47,7 +47,7 @@ public class OverpassClient {
 
         String around = "(around:" + radiusM + "," +
                 String.format(Locale.US, "%.5f,%.5f", lat, lon) + ")";
-        String q = "[out:json][timeout:25];(" +
+        String q = "[out:json][timeout:35];(" +
                 "nwr[\"amenity\"=\"hospital\"]" + around + ";" +
                 "nwr[\"amenity\"=\"clinic\"]" + around + ";" +
                 "nwr[\"amenity\"=\"pharmacy\"]" + around + ";" +
@@ -57,7 +57,7 @@ public class OverpassClient {
                 new URL("https://overpass-api.de/api/interpreter").openConnection();
         c.setRequestMethod("POST");
         c.setConnectTimeout(10000);
-        c.setReadTimeout(30000);
+        c.setReadTimeout(35000);
         c.setDoOutput(true);
         // Use the shared User-Agent defined in MediQApp so it is consistent across all HTTP calls.
         c.setRequestProperty("User-Agent", com.example.mediq.MediQApp.USER_AGENT);

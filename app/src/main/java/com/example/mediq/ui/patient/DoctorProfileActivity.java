@@ -41,6 +41,8 @@ public class DoctorProfileActivity extends AppCompatActivity {
     private TextView tvDoctorProfileSpecialty;
     private TextView tvDoctorProfileRating;
     private TextView tvDoctorProfileExperience;
+    private TextView tvDoctorProfileGenderHeader;
+    private TextView tvDoctorProfileHospitalHeader;
     private TabLayout tabLayout;
 
     private LinearLayout layoutTabAbout;
@@ -50,6 +52,8 @@ public class DoctorProfileActivity extends AppCompatActivity {
     private TextView tvNoReviews;
 
     private TextView tvDoctorBio;
+    private TextView tvDoctorGender;
+    private TextView tvDoctorHospitalDetail;
     private TextView tvConsultationFee;
     private TextView tvConsultationDuration;
     private TextView tvHospitalLocation;
@@ -72,6 +76,7 @@ public class DoctorProfileActivity extends AppCompatActivity {
         checkFavoriteStatus();
         fetchReviews();
         fetchAvailability();
+        fetchDoctorLiveDetails();
         View wr = findViewById(R.id.btnWriteReview);
         if (wr != null) wr.setOnClickListener(v -> showWriteReviewDialog());
     }
@@ -99,6 +104,8 @@ public class DoctorProfileActivity extends AppCompatActivity {
         tvDoctorProfileSpecialty = findViewById(R.id.tvDoctorProfileSpecialty);
         tvDoctorProfileRating = findViewById(R.id.tvDoctorProfileRating);
         tvDoctorProfileExperience = findViewById(R.id.tvDoctorProfileExperience);
+        tvDoctorProfileGenderHeader = findViewById(R.id.tvDoctorProfileGenderHeader);
+        tvDoctorProfileHospitalHeader = findViewById(R.id.tvDoctorProfileHospitalHeader);
         tabLayout = findViewById(R.id.tabLayout);
 
         layoutTabAbout = findViewById(R.id.layoutTabAbout);
@@ -108,6 +115,8 @@ public class DoctorProfileActivity extends AppCompatActivity {
         tvNoReviews = findViewById(R.id.tvNoReviews);
 
         tvDoctorBio = findViewById(R.id.tvDoctorBio);
+        tvDoctorGender = findViewById(R.id.tvDoctorGender);
+        tvDoctorHospitalDetail = findViewById(R.id.tvDoctorHospitalDetail);
         tvConsultationFee = findViewById(R.id.tvConsultationFee);
         tvConsultationDuration = findViewById(R.id.tvConsultationDuration);
         tvHospitalLocation = findViewById(R.id.tvHospitalLocation);
@@ -127,15 +136,36 @@ public class DoctorProfileActivity extends AppCompatActivity {
         tvDoctorProfileRating.setText(currentDoctor.getRatingAndReviewsText());
         tvDoctorProfileExperience.setText(currentDoctor.getFormattedExperience());
 
+        boolean isFemale = currentDoctor.isFemale();
+        String genderStr = currentDoctor.getGender();
+        if (genderStr == null || genderStr.trim().isEmpty() || "Not set".equalsIgnoreCase(genderStr)) {
+            genderStr = isFemale ? "Female" : "Male";
+        }
+        if (tvDoctorGender != null) {
+            tvDoctorGender.setText(genderStr);
+        }
+        if (tvDoctorProfileGenderHeader != null) {
+            tvDoctorProfileGenderHeader.setText(isFemale ? "Female Doctor" : "Male Doctor");
+        }
+        if (tvDoctorHospitalDetail != null && currentDoctor.getHospitalName() != null) {
+            tvDoctorHospitalDetail.setText(currentDoctor.getHospitalName());
+        }
+        if (tvDoctorProfileHospitalHeader != null && currentDoctor.getHospitalName() != null) {
+            tvDoctorProfileHospitalHeader.setVisibility(View.VISIBLE);
+            tvDoctorProfileHospitalHeader.setText(currentDoctor.getHospitalName());
+        }
+
+        int defaultAvatar = isFemale ? R.drawable.ic_doctor_female_avatar : R.drawable.ic_doctor_male_avatar;
+        currentDoctor.setAvatarResId(defaultAvatar);
+
         if (currentDoctor.getAvatarUrl() != null && !currentDoctor.getAvatarUrl().isEmpty()) {
             Glide.with(this)
                     .load(currentDoctor.getAvatarUrl())
-                    .placeholder(currentDoctor.getAvatarResId() != 0 ? currentDoctor.getAvatarResId() : R.drawable.ic_doctor_male_avatar)
+                    .placeholder(defaultAvatar)
+                    .error(defaultAvatar)
                     .into(ivDoctorProfileAvatar);
-        } else if (currentDoctor.getAvatarResId() != 0) {
-            ivDoctorProfileAvatar.setImageResource(currentDoctor.getAvatarResId());
         } else {
-            ivDoctorProfileAvatar.setImageResource(R.drawable.ic_doctor_male_avatar);
+            ivDoctorProfileAvatar.setImageResource(defaultAvatar);
         }
 
         tvDoctorBio.setText(currentDoctor.getBio());
@@ -145,6 +175,44 @@ public class DoctorProfileActivity extends AppCompatActivity {
         if (tvHospitalLocation != null && currentDoctor.getHospitalName() != null) {
             tvHospitalLocation.setText(currentDoctor.getHospitalName());
         }
+    }
+
+    private void fetchDoctorLiveDetails() {
+        if (currentDoctor == null || currentDoctor.getId() == null) return;
+        SupabaseClient.getInstance().get("doctors?id=eq." + currentDoctor.getId() + "&select=*,profiles(gender,phone,blood_group,emergency_contact),hospitals(name,address)",
+                new SupabaseClient.Callback() {
+                    @Override
+                    public void onSuccess(String response) {
+                        try {
+                            JSONArray arr = new JSONArray(response);
+                            if (arr.length() > 0) {
+                                JSONObject o = arr.getJSONObject(0);
+                                String gender = SupabaseClient.optStringSafe(o, "gender");
+                                if (gender == null || gender.isEmpty()) {
+                                    JSONObject p = o.optJSONObject("profiles");
+                                    if (p != null) gender = SupabaseClient.optStringSafe(p, "gender");
+                                }
+                                if (gender != null && !gender.isEmpty()) {
+                                    currentDoctor.setGender(gender);
+                                }
+                                String avatar = SupabaseClient.optStringSafe(o, "avatar_url");
+                                if (avatar != null && !avatar.isEmpty()) {
+                                    currentDoctor.setAvatarUrl(avatar);
+                                }
+                                JSONObject h = o.optJSONObject("hospitals");
+                                if (h != null) {
+                                    String hn = SupabaseClient.optStringSafe(h, "name");
+                                    String ha = SupabaseClient.optStringSafe(h, "address");
+                                    if (hn != null) currentDoctor.setHospitalName(hn + (ha != null && !ha.isEmpty() ? " • " + ha : ""));
+                                }
+                                runOnUiThread(() -> bindDoctorData());
+                            }
+                        } catch (Exception ignored) {}
+                    }
+
+                    @Override
+                    public void onError(Exception error) {}
+                });
     }
 
     private void setupListeners() {

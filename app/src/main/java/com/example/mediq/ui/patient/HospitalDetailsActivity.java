@@ -5,11 +5,14 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
+import com.bumptech.glide.Glide;
 import com.example.mediq.R;
 import com.example.mediq.data.model.Hospital;
 import com.example.mediq.data.remote.SessionManager;
@@ -30,6 +33,7 @@ public class HospitalDetailsActivity extends AppCompatActivity {
     private Hospital hospital;
     private boolean isFavorite = false;
 
+    private ImageView ivHospitalBanner;
     private TextView tvName;
     private TextView tvType;
     private TextView tvRating;
@@ -47,6 +51,7 @@ public class HospitalDetailsActivity extends AppCompatActivity {
 
         ImageButton btnBack = findViewById(R.id.btnBack);
         btnFavorite = findViewById(R.id.btnFavorite);
+        ivHospitalBanner = findViewById(R.id.ivHospitalBanner);
         tvName = findViewById(R.id.tvHospitalDetailsName);
         tvType = findViewById(R.id.tvHospitalDetailsType);
         tvRating = findViewById(R.id.tvHospitalDetailsRating);
@@ -61,6 +66,7 @@ public class HospitalDetailsActivity extends AppCompatActivity {
             hospital = (Hospital) getIntent().getSerializableExtra("extra_hospital");
             populateViews();
             checkFavoriteStatus();
+            fetchLatestHospitalData();
         } else if (getIntent().hasExtra("hospital_id")) {
             fetchHospitalById(getIntent().getStringExtra("hospital_id"));
         } else {
@@ -250,13 +256,21 @@ public class HospitalDetailsActivity extends AppCompatActivity {
                                 obj.optString("phone", ""),
                                 obj.optString("opening_hours", "8:00 AM - 8:00 PM"),
                                 facilities,
-                                R.drawable.ic_hospital_building,
+                                R.drawable.ic_hospital_illustration,
                                 obj.optDouble("rating", 4.5),
                                 obj.optInt("review_count", 0),
                                 obj.optBoolean("active", true),
                                 obj.optDouble("latitude", 25.6093),
                                 obj.optDouble("longitude", 85.1376)
                         );
+                        String cover = SupabaseClient.optStringSafe(obj, "image_url");
+                        if (cover == null || cover.trim().isEmpty()) {
+                            JSONArray imgs = obj.optJSONArray("image_urls");
+                            if (imgs != null && imgs.length() > 0) {
+                                cover = imgs.optString(0, null);
+                            }
+                        }
+                        hospital.setImageUrl(cover);
                         populateViews();
                         checkFavoriteStatus();
                     }
@@ -270,17 +284,71 @@ public class HospitalDetailsActivity extends AppCompatActivity {
         });
     }
 
+    private void fetchLatestHospitalData() {
+        if (hospital == null || hospital.getId() == null) return;
+        SupabaseClient.getInstance().get("hospitals?id=eq." + hospital.getId() + "&select=image_url,image_urls", new SupabaseClient.Callback() {
+            @Override
+            public void onSuccess(String response) {
+                try {
+                    JSONArray arr = new JSONArray(response);
+                    if (arr.length() > 0) {
+                        JSONObject obj = arr.getJSONObject(0);
+                        String cover = SupabaseClient.optStringSafe(obj, "image_url");
+                        if (cover == null || cover.trim().isEmpty()) {
+                            JSONArray imgs = obj.optJSONArray("image_urls");
+                            if (imgs != null && imgs.length() > 0) {
+                                cover = imgs.optString(0, null);
+                            }
+                        }
+                        if (cover != null && !cover.trim().isEmpty()) {
+                            hospital.setImageUrl(cover);
+                            if (ivHospitalBanner != null && !isFinishing() && !isDestroyed()) {
+                                Glide.with(HospitalDetailsActivity.this)
+                                        .load(cover)
+                                        .placeholder(R.drawable.ic_hospital_illustration)
+                                        .error(R.drawable.ic_hospital_illustration)
+                                        .centerCrop()
+                                        .into(ivHospitalBanner);
+                            }
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
+
+            @Override
+            public void onError(Exception error) {}
+        });
+    }
+
     private void populateViews() {
         if (hospital == null) return;
         tvName.setText(hospital.getName());
         tvType.setText(hospital.getType());
         tvRating.setText(hospital.getFormattedRating() + " reviews");
+        Boolean open = hospital.isOpenNow();
         tvStatus.setText(hospital.getOpenStatusText());
+        boolean closed = open != null && !open;
+        tvStatus.setBackgroundResource(closed ? R.drawable.bg_badge_closed : R.drawable.bg_badge_success);
+        tvStatus.setTextColor(ContextCompat.getColor(this, closed ? R.color.colorSos : R.color.colorSuccess));
         tvAddress.setText(hospital.getAddress());
         tvPhone.setText(hospital.getPhone());
 
         if (hospital.getFacilities() != null) {
             tvFacilities.setText(android.text.TextUtils.join(", ", hospital.getFacilities()));
+        }
+
+        if (ivHospitalBanner != null) {
+            String imgUrl = hospital.getImageUrl();
+            if (imgUrl != null && !imgUrl.trim().isEmpty()) {
+                Glide.with(this)
+                        .load(imgUrl)
+                        .placeholder(R.drawable.ic_hospital_illustration)
+                        .error(R.drawable.ic_hospital_illustration)
+                        .centerCrop()
+                        .into(ivHospitalBanner);
+            } else {
+                ivHospitalBanner.setImageResource(R.drawable.ic_hospital_illustration);
+            }
         }
     }
 

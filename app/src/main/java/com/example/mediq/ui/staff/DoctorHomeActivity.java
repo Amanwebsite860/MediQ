@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -30,7 +31,8 @@ public class DoctorHomeActivity extends AppCompatActivity {
     };
 
     private SwipeRefreshLayout swipe;
-    private TextView tvName, tvMeta, tvNow, tvWaiting, tvEmpty;
+    private TextView tvName, tvMeta, tvNow, tvWaiting, tvEmpty, tvDocGenderBadge, tvDocPhoneBadge;
+    private ImageView ivDocAvatar;
     private LinearLayout layoutEntries;
     private View btnCallNext;
     private String doctorId, queueId;
@@ -42,6 +44,9 @@ public class DoctorHomeActivity extends AppCompatActivity {
         swipe = findViewById(R.id.swipeStaff);
         tvName = findViewById(R.id.tvDocName);
         tvMeta = findViewById(R.id.tvDocMeta);
+        tvDocGenderBadge = findViewById(R.id.tvDocGenderBadge);
+        tvDocPhoneBadge = findViewById(R.id.tvDocPhoneBadge);
+        ivDocAvatar = findViewById(R.id.ivDocAvatar);
         tvNow = findViewById(R.id.tvNowServing);
         tvWaiting = findViewById(R.id.tvWaitingCount);
         tvEmpty = findViewById(R.id.tvDocEmpty);
@@ -50,6 +55,12 @@ public class DoctorHomeActivity extends AppCompatActivity {
 
         findViewById(R.id.btnLogout).setOnClickListener(v -> StaffUtils.logout(this));
         StaffUtils.bindBell(this, findViewById(R.id.btnBell));
+        View.OnClickListener openEditAction = v ->
+                com.example.mediq.ui.common.ProfileEditSheet.show(this, "doctor", this::loadDoctor);
+        View btnEdit = findViewById(R.id.btnEditDoctorProfile);
+        if (btnEdit != null) btnEdit.setOnClickListener(openEditAction);
+        if (ivDocAvatar != null) ivDocAvatar.setOnClickListener(openEditAction);
+
         btnCallNext.setOnClickListener(v -> callNext());
         swipe.setOnRefreshListener(this::loadDoctor);
     }
@@ -66,7 +77,9 @@ public class DoctorHomeActivity extends AppCompatActivity {
 
     private void loadDoctor() {
         String uid = SessionManager.getInstance(this).getUserId();
-        SupabaseClient.getInstance().get("doctors?profile_id=eq." + uid + "&select=id,name,specialty,hospitals(name)",
+        updateAvatar(SessionManager.getInstance(this).getUserAvatarUrl());
+        bindPersonalBadges();
+        SupabaseClient.getInstance().get("doctors?profile_id=eq." + uid + "&select=id,name,specialty,avatar_url,hospitals(name),profiles(gender,phone,blood_group,emergency_contact)",
                 new SupabaseClient.Callback() {
                     @Override public void onSuccess(String json) {
                         try {
@@ -75,6 +88,27 @@ public class DoctorHomeActivity extends AppCompatActivity {
                             JSONObject d = arr.getJSONObject(0);
                             doctorId = d.optString("id");
                             tvName.setText(d.optString("name"));
+
+                            JSONObject p = d.optJSONObject("profiles");
+                            if (p != null) {
+                                String g = SupabaseClient.optStringSafe(p, "gender");
+                                if (g != null && !g.isEmpty()) SessionManager.getInstance(DoctorHomeActivity.this).setUserGender(g);
+                                String ph = SupabaseClient.optStringSafe(p, "phone");
+                                if (ph != null && !ph.isEmpty()) SessionManager.getInstance(DoctorHomeActivity.this).setUserPhone(ph);
+                                String bg = SupabaseClient.optStringSafe(p, "blood_group");
+                                if (bg != null && !bg.isEmpty()) SessionManager.getInstance(DoctorHomeActivity.this).setUserBloodGroup(bg);
+                                String em = SupabaseClient.optStringSafe(p, "emergency_contact");
+                                if (em != null && !em.isEmpty()) SessionManager.getInstance(DoctorHomeActivity.this).setUserEmergencyContact(em);
+                            }
+                            bindPersonalBadges();
+
+                            String avatar = SupabaseClient.optStringSafe(d, "avatar_url");
+                            if (avatar != null && !avatar.isEmpty()) {
+                                SessionManager.getInstance(DoctorHomeActivity.this).setUserAvatarUrl(avatar);
+                                updateAvatar(avatar);
+                            } else {
+                                fetchProfileAvatar(uid);
+                            }
                             JSONObject h = d.optJSONObject("hospitals");
                             tvMeta.setText(d.optString("specialty") + (h != null ? "  ·  " + h.optString("name") : ""));
                             loadQueue();
@@ -82,6 +116,79 @@ public class DoctorHomeActivity extends AppCompatActivity {
                     }
                     @Override public void onError(Exception e) { swipe.setRefreshing(false); }
                 });
+    }
+
+    private void bindPersonalBadges() {
+        SessionManager sm = SessionManager.getInstance(this);
+        String gender = sm.getUserGender();
+        if (tvDocGenderBadge != null) {
+            if (gender != null && !gender.trim().isEmpty() && !"Not set".equalsIgnoreCase(gender)) {
+                tvDocGenderBadge.setVisibility(View.VISIBLE);
+                tvDocGenderBadge.setText(gender);
+            } else {
+                tvDocGenderBadge.setVisibility(View.GONE);
+            }
+        }
+        String phone = sm.getUserPhone();
+        if (tvDocPhoneBadge != null) {
+            if (phone != null && !phone.trim().isEmpty()) {
+                tvDocPhoneBadge.setVisibility(View.VISIBLE);
+                tvDocPhoneBadge.setText("📞 " + phone);
+            } else {
+                tvDocPhoneBadge.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    private void fetchProfileAvatar(String uid) {
+        SupabaseClient.getInstance().get("profiles?id=eq." + uid + "&select=avatar_url,gender", new SupabaseClient.Callback() {
+            @Override
+            public void onSuccess(String json) {
+                try {
+                    JSONArray arr = new JSONArray(json);
+                    if (arr.length() > 0) {
+                        JSONObject obj = arr.getJSONObject(0);
+                        String url = SupabaseClient.optStringSafe(obj, "avatar_url");
+                        String g = SupabaseClient.optStringSafe(obj, "gender");
+                        if (g != null && !g.isEmpty()) {
+                            SessionManager.getInstance(DoctorHomeActivity.this).setUserGender(g);
+                        }
+                        if (url != null && !url.isEmpty()) {
+                            SessionManager.getInstance(DoctorHomeActivity.this).setUserAvatarUrl(url);
+                        }
+                        runOnUiThread(() -> {
+                            bindPersonalBadges();
+                            updateAvatar(SessionManager.getInstance(DoctorHomeActivity.this).getUserAvatarUrl());
+                        });
+                    }
+                } catch (Exception ignored) {}
+            }
+            @Override public void onError(Exception e) {}
+        });
+    }
+
+    private void updateAvatar(String url) {
+        if (ivDocAvatar == null || isFinishing()) return;
+        String gender = SessionManager.getInstance(this).getUserGender();
+        boolean isFemale = isFemaleGender(gender);
+        int placeholder = isFemale ? R.drawable.ic_doctor_female_avatar : R.drawable.ic_doctor_male_avatar;
+
+        if (url != null && !url.isEmpty()) {
+            com.bumptech.glide.Glide.with(this)
+                    .load(url.startsWith("content://") || url.startsWith("file://") ? android.net.Uri.parse(url) : url)
+                    .placeholder(placeholder)
+                    .error(placeholder)
+                    .circleCrop()
+                    .into(ivDocAvatar);
+        } else {
+            ivDocAvatar.setImageResource(placeholder);
+        }
+    }
+
+    private boolean isFemaleGender(String gender) {
+        if (gender == null) return false;
+        String g = gender.trim().toLowerCase(java.util.Locale.ROOT);
+        return g.startsWith("f") || g.contains("female") || g.contains("woman");
     }
 
     private void loadQueue() {

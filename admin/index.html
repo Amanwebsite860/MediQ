@@ -3,59 +3,584 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MediQ Admin</title>
+<title>MediQ · Healthcare Administration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <style>
-:root{--bg:#f4f6fb;--card:#fff;--tx:#14213d;--mut:#6b7280;--pri:#1976d2;--pri-hover:#1565c0;--ok:#1ba672;--bad:#e53935;--warn:#f59e0b;--line:#e2e8f0;--input-bg:#f8fafc}
-@media(prefers-color-scheme:dark){:root{--bg:#0b111e;--card:#131c2e;--tx:#f1f5f9;--mut:#8b9bb4;--pri:#2196f3;--pri-hover:#1e88e5;--line:#22314d;--input-bg:#0e1626}}
-*{box-sizing:border-box}body{margin:0;font:14px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
-header{display:flex;align-items:center;gap:12px;padding:12px 20px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
-header h1{font-size:18px;margin:0;flex:1}main{max-width:1100px;margin:0 auto;padding:18px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
-.stat b{display:block;font-size:26px}.stat span{color:var(--mut)}
-nav{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
-button,input,select{font:inherit}button{border:0;border-radius:9px;padding:8px 14px;cursor:pointer;background:var(--pri);color:#fff;font-weight:600}
-button.sec{background:transparent;color:var(--pri);border:1px solid var(--line)}button.sec.on{background:var(--pri);color:#fff}
-button.ok{background:var(--ok)}button.bad{background:var(--bad)}button.warn{background:var(--warn)}
-input,select{padding:9px 11px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--tx);width:100%}
-.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.grow{flex:1}
-.tag{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:700;background:var(--line)}
-.pending{color:var(--warn)}.approved{color:var(--ok)}.rejected{color:var(--bad)}
-.kv{display:grid;grid-template-columns:150px 1fr;gap:4px 12px;margin:10px 0}.kv dt{color:var(--mut)}.kv dd{margin:0;word-break:break-word}
-.imgs{display:flex;gap:8px;overflow-x:auto;margin:8px 0}.imgs img{height:90px;border-radius:10px;border:1px solid var(--line)}
-table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line)}th{color:var(--mut);font-weight:600}
-.muted{color:var(--mut)}
+:root {
+  --font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --card-hover: #fcfdfe;
+  --tx: #0f172a;
+  --tx-sec: #475569;
+  --mut: #64748b;
+  --pri: #0284c7;
+  --pri-dark: #0369a1;
+  --pri-light: #e0f2fe;
+  --cyan: #00A3FF;
+  --navy: #0F2851;
+  --ok: #10b981;
+  --ok-bg: #ecfdf5;
+  --ok-border: #a7f3d0;
+  --ok-text: #065f46;
+  --bad: #ef4444;
+  --bad-bg: #fef2f2;
+  --bad-border: #fecaca;
+  --bad-text: #991b1b;
+  --warn: #f59e0b;
+  --warn-bg: #fffbeb;
+  --warn-border: #fde68a;
+  --warn-text: #92400e;
+  --line: #e2e8f0;
+  --input-bg: #f8fafc;
+  --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+}
+
+@media(prefers-color-scheme:dark){
+  :root {
+    --bg: #0b1120;
+    --card: #131d31;
+    --card-hover: #18243c;
+    --tx: #f8fafc;
+    --tx-sec: #cbd5e1;
+    --mut: #94a3b8;
+    --pri: #38bdf8;
+    --pri-dark: #0284c7;
+    --pri-light: rgba(56, 189, 248, 0.12);
+    --ok: #34d399;
+    --ok-bg: rgba(16, 185, 129, 0.12);
+    --ok-border: rgba(16, 185, 129, 0.3);
+    --ok-text: #6ee7b7;
+    --bad: #f87171;
+    --bad-bg: rgba(239, 68, 68, 0.12);
+    --bad-border: rgba(239, 68, 68, 0.3);
+    --bad-text: #fca5a5;
+    --warn: #fbbf24;
+    --warn-bg: rgba(245, 158, 11, 0.12);
+    --warn-border: rgba(245, 158, 11, 0.3);
+    --warn-text: #fde68a;
+    --line: #1e293b;
+    --input-bg: #0e1726;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  }
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--tx);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Header */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 28px;
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(8px);
+}
+.brand-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand-logo-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #0f2851 0%, #0284c7 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(2, 132, 199, 0.25);
+}
+.brand-title-wrap h1 {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.brand-title-wrap p {
+  font-size: 11px;
+  color: var(--mut);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.brand-title-navy { color: var(--navy); }
+@media(prefers-color-scheme:dark){ .brand-title-navy { color: #f8fafc; } }
+.brand-title-cyan { color: var(--cyan); }
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.admin-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.admin-avatar-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+}
+
+/* Stats Cards */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.stat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.stat-icon.amber { background: var(--warn-bg); color: var(--warn-text); border: 1px solid var(--warn-border); }
+.stat-icon.blue { background: var(--pri-light); color: var(--pri); border: 1px solid rgba(2,132,199,0.25); }
+.stat-icon.green { background: var(--ok-bg); color: var(--ok-text); border: 1px solid var(--ok-border); }
+.stat-icon.purple { background: rgba(147, 51, 234, 0.1); color: #9333ea; border: 1px solid rgba(147, 51, 234, 0.2); }
+.stat-icon.cyan { background: rgba(0, 163, 255, 0.1); color: #0284c7; border: 1px solid rgba(0, 163, 255, 0.2); }
+
+.stat-info b {
+  display: block;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--tx);
+}
+.stat-info span {
+  font-size: 12px;
+  color: var(--mut);
+  font-weight: 600;
+}
+
+/* Nav Tabs */
+nav.tab-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.tab-pills {
+  display: flex;
+  background: var(--card);
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  gap: 4px;
+}
+.tab-pills button {
+  padding: 8px 16px;
+  border-radius: 9px;
+  border: 0;
+  font-size: 13px;
+  font-weight: 600;
+  background: transparent;
+  color: var(--tx-sec);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+}
+.tab-pills button:hover {
+  color: var(--tx);
+}
+.tab-pills button.on {
+  background: var(--pri);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
+}
+.count-pill {
+  padding: 2px 7px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.tab-pills button.on .count-pill {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+.tab-pills button:not(.on) .count-pill {
+  background: var(--warn-bg);
+  color: var(--warn-text);
+}
+
+.search-box {
+  position: relative;
+  min-width: 260px;
+}
+.search-box input {
+  padding-left: 36px;
+  font-size: 13px;
+  height: 40px;
+}
+.search-box svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--mut);
+  pointer-events: none;
+}
+
+/* Cards & Content */
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Button & Form Elements */
+button, input, select, textarea { font-family: inherit; font-size: 13px; }
+button {
+  border: 0;
+  border-radius: 9px;
+  padding: 8px 16px;
+  cursor: pointer;
+  background: var(--pri);
+  color: #fff;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+button:hover { filter: brightness(1.05); transform: translateY(-1px); }
+button:active { transform: translateY(0); }
+button.sec {
+  background: var(--card);
+  color: var(--tx-sec);
+  border: 1px solid var(--line);
+}
+button.sec:hover {
+  background: var(--bg);
+  color: var(--tx);
+  border-color: #cbd5e1;
+}
+button.sec.on {
+  background: var(--pri-light);
+  color: var(--pri);
+  border-color: rgba(2, 132, 199, 0.3);
+}
+button.ok {
+  background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
+}
+button.bad {
+  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.25);
+}
+button.warn {
+  background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+  color: #fff;
+}
+
+input, select, textarea {
+  padding: 10px 13px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--input-bg);
+  color: var(--tx);
+  width: 100%;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--pri);
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.grow { flex: 1; }
+
+/* Status Badges */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: capitalize;
+  letter-spacing: 0.02em;
+}
+.tag.pending { background: var(--warn-bg); color: var(--warn-text); border: 1px solid var(--warn-border); }
+.tag.approved { background: var(--ok-bg); color: var(--ok-text); border: 1px solid var(--ok-border); }
+.tag.rejected { background: var(--bad-bg); color: var(--bad-text); border: 1px solid var(--bad-border); }
+.tag.doctor { background: rgba(2,132,199,0.1); color: var(--pri); border: 1px solid rgba(2,132,199,0.25); }
+.tag.receptionist { background: rgba(147,51,234,0.1); color: #9333ea; border: 1px solid rgba(147,51,234,0.25); }
+.tag.patient { background: var(--bg); color: var(--tx-sec); border: 1px solid var(--line); }
+.tag.admin { background: #0f172a; color: #f8fafc; border: 1px solid #334155; }
+
+/* Key-Value Details */
+.kv {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 6px 14px;
+  margin: 12px 0;
+  font-size: 13px;
+}
+.kv dt { color: var(--mut); font-weight: 500; }
+.kv dd { margin: 0; color: var(--tx); word-break: break-word; font-weight: 600; }
+
+.imgs { display: flex; gap: 10px; overflow-x: auto; margin: 12px 0; padding-bottom: 4px; }
+.imgs img {
+  height: 96px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  object-fit: cover;
+  transition: transform 0.15s;
+}
+.imgs img:hover { transform: scale(1.03); }
+
+/* Table Styling */
+table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+th { color: var(--mut); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; background: var(--card); }
+tr:last-child td { border-bottom: 0; }
+tr:hover td { background: var(--card-hover); }
+
+/* Empty state */
+.empty-box {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--mut);
+}
+.empty-box svg {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
+  stroke: var(--mut);
+  opacity: 0.5;
+}
+
+/* Modal Dialog */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+  animation: fadeIn 0.15s ease-out;
+}
+.modal-box {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  max-width: 480px;
+  width: 100%;
+  padding: 24px;
+  box-shadow: var(--shadow-lg);
+  animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.modal-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+.modal-sub { font-size: 13px; color: var(--mut); margin-bottom: 16px; }
+.quick-reasons { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 16px; }
+.chip-reason {
+  font-size: 12px;
+  padding: 4px 10px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  cursor: pointer;
+  font-weight: 500;
+}
+.chip-reason:hover { border-color: var(--pri); color: var(--pri); }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+/* Toast */
+.toast-msg {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #0f172a;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 200;
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
 
 /* Login Page Styles */
-.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;background:radial-gradient(circle at 50% 20%, rgba(25,118,210,0.06), transparent 70%)}
-.login-card{width:100%;max-width:400px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:36px 30px;box-shadow:0 20px 45px -12px rgba(15,23,42,0.08), 0 1px 3px rgba(15,23,42,0.04);transition:transform 0.2s ease}
-.login-header{text-align:center;margin-bottom:26px}
-.login-icon{width:56px;height:56px;margin:0 auto 14px;border-radius:16px;background:linear-gradient(135deg,#1976d2,#0d47a1);display:flex;align-items:center;justify-content:center;font-size:26px;color:#fff;box-shadow:0 8px 18px -4px rgba(25,118,210,0.35)}
-.login-title{font-size:22px;font-weight:700;letter-spacing:-0.02em;margin:0 0 5px;color:var(--tx)}
-.login-subtitle{font-size:13px;color:var(--mut);margin:0}
-.form-group{margin-bottom:18px}
-.form-label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--tx)}
-.form-input{width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:var(--input-bg);color:var(--tx);font-size:14px;transition:border-color 0.15s,box-shadow 0.15s}
-.form-input:focus{outline:none;border-color:var(--pri);box-shadow:0 0 0 3px rgba(25,118,210,0.15)}
-.btn-submit{width:100%;padding:12px;border:0;border-radius:10px;background:linear-gradient(180deg,#1e88e5 0%,#1976d2 100%);color:#fff;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 14px -2px rgba(25,118,210,0.35);transition:background 0.15s,transform 0.1s,opacity 0.15s}
-.btn-submit:hover:not(:disabled){background:var(--pri-hover);transform:translateY(-1px)}
-.btn-submit:active:not(:disabled){transform:translateY(0)}
-.btn-submit:disabled{opacity:0.65;cursor:not-allowed}
-.alert-error{background:rgba(229,57,53,0.08);border:1px solid rgba(229,57,53,0.25);color:var(--bad);border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:18px;display:flex;align-items:center;gap:8px}
-.login-footer{margin-top:24px;text-align:center;font-size:12px;color:var(--mut);display:flex;align-items:center;justify-content:center;gap:6px}
+.login-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background: radial-gradient(circle at 50% 15%, rgba(2, 132, 199, 0.08), transparent 60%), var(--bg);
+}
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 36px 32px;
+  box-shadow: var(--shadow-lg);
+}
+.login-header { text-align: center; margin-bottom: 26px; }
+.login-icon-box {
+  width: 62px;
+  height: 62px;
+  margin: 0 auto 16px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #0f2851 0%, #0284c7 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 22px -4px rgba(2, 132, 199, 0.4);
+}
+.login-title { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 6px; }
+.login-subtitle { font-size: 13px; color: var(--mut); margin: 0; }
+.form-group { margin-bottom: 18px; }
+.form-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.btn-submit {
+  width: 100%;
+  padding: 13px;
+  border: 0;
+  border-radius: 11px;
+  background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+  justify-content: center;
+}
+.alert-error {
+  background: var(--bad-bg);
+  border: 1px solid var(--bad-border);
+  color: var(--bad-text);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 13px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.login-footer {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--mut);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes popIn { from { transform: scale(0.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 </style>
 </head>
 <body>
 <div id="app"></div>
+
 <script>
 const $ = (s, r=document) => r.querySelector(s);
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let sb, me, tab = 'apps', appFilter = 'pending', userFilter = 'all';
+let sb, me, tab = 'apps', appFilter = 'pending', userFilter = 'all', searchQuery = '';
 let currentCfg = null;
+let cachedApps = [], cachedHospitals = [], cachedUsers = [];
+
+// MediQ Logo SVG
+const MEDIQ_LOGO_SVG = `
+<svg width="26" height="26" viewBox="0 0 64 64" fill="none">
+  <circle cx="28" cy="28" r="20" stroke="#00A3FF" stroke-width="6" stroke-linecap="round"/>
+  <line x1="43" y1="43" x2="56" y2="56" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+  <rect x="25" y="16" width="6" height="24" rx="3" fill="#ffffff"/>
+  <rect x="16" y="25" width="24" height="6" rx="3" fill="#ffffff"/>
+</svg>`;
+
+function toast(msg, isErr=false){
+  const old = document.querySelector('.toast-msg');
+  if(old) old.remove();
+  const el = document.createElement('div');
+  el.className = 'toast-msg';
+  el.innerHTML = `<span>${isErr ? '⚠️' : '✓'}</span><span>${esc(msg)}</span>`;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
 
 async function resolveConfig(){
-  // 1. Try Vercel Serverless API (/api/config or ./api/config)
   for (const endpoint of ['/api/config', 'api/config', './api/config']) {
     try {
       const res = await fetch(endpoint);
@@ -67,20 +592,14 @@ async function resolveConfig(){
       }
     } catch(e){}
   }
-
-  // 2. Check localStorage
   try {
     const stored = JSON.parse(localStorage.getItem('mediq_admin_cfg') || 'null');
     if(stored && stored.url && stored.key) return stored;
   } catch(e){}
 
-  // 3. Fallback defaults from project configuration
   const defUrl = 'https://ouddhqorzshmuumywxhl.supabase.co';
   const defKey = 'sb_publishable_ORH7iwG_EtWxES-wZtcmsA_1WmLYaAZ';
-  if(defUrl && defKey){
-    return { url: defUrl, key: defKey, isDefault: true };
-  }
-
+  if(defUrl && defKey) return { url: defUrl, key: defKey, isDefault: true };
   return null;
 }
 
@@ -95,14 +614,29 @@ async function resolveConfig(){
 })();
 
 function showConfig(msg){
-  $('#app').innerHTML = `<div class="login card"><h2>Connect to Supabase</h2>
-  <p class="muted">Project Settings → API. Use the <b>anon / public</b> key only (never the service_role key).</p>
-  <input id="u" placeholder="Project URL (https://xxxx.supabase.co)" value="https://ouddhqorzshmuumywxhl.supabase.co">
-  <input id="k" placeholder="anon public key" value="sb_publishable_ORH7iwG_EtWxES-wZtcmsA_1WmLYaAZ">
-  <button id="go">Save</button><div class="err">${esc(msg||'')}</div></div>`;
+  $('#app').innerHTML = `
+    <div class="login-wrap">
+      <div class="login-card">
+        <div class="login-header">
+          <div class="login-icon-box">${MEDIQ_LOGO_SVG}</div>
+          <h2 class="login-title">Connect Backend</h2>
+          <p class="login-subtitle">Supabase Connection Settings</p>
+        </div>
+        ${msg ? `<div class="alert-error"><div>${esc(msg)}</div></div>` : ''}
+        <div class="form-group">
+          <label class="form-label">Project URL</label>
+          <input id="u" placeholder="https://xxxx.supabase.co" value="https://ouddhqorzshmuumywxhl.supabase.co">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Anon / Public API Key</label>
+          <input id="k" placeholder="sb_publishable_..." value="sb_publishable_ORH7iwG_EtWxES-wZtcmsA_1WmLYaAZ">
+        </div>
+        <button id="go" class="btn-submit">Save Connection</button>
+      </div>
+    </div>`;
   $('#go').onclick = () => {
     const url = $('#u').value.trim(), key = $('#k').value.trim();
-    if(!/^https:\/\/.+\.supabase\.co\/?$/.test(url) || key.length < 20) return showConfig('Check the URL and key.');
+    if(!/^https:\/\/.+\.supabase\.co\/?$/.test(url) || key.length < 20) return showConfig('Check URL and key format.');
     localStorage.setItem('mediq_admin_cfg', JSON.stringify({url, key})); location.reload();
   };
 }
@@ -112,9 +646,11 @@ function showLogin(msg){
     <div class="login-wrap">
       <div class="login-card">
         <div class="login-header">
-          <div class="login-icon">🏥</div>
-          <h2 class="login-title">MediQ Admin</h2>
-          <p class="login-subtitle">Healthcare Administration Portal</p>
+          <div class="login-icon-box">${MEDIQ_LOGO_SVG}</div>
+          <h2 class="login-title">
+            <span class="brand-title-navy">Medi</span><span class="brand-title-cyan">Q</span> Admin
+          </h2>
+          <p class="login-subtitle">Healthcare Verification & Operations Portal</p>
         </div>
 
         ${msg ? `<div class="alert-error">
@@ -128,7 +664,7 @@ function showLogin(msg){
             <input id="e" class="form-input" type="email" placeholder="admin@mediq.com" required autofocus autocomplete="email">
           </div>
           <div class="form-group">
-            <label class="form-label" for="p">Password</label>
+            <label class="form-label" for="p">Master Password</label>
             <input id="p" class="form-input" type="password" placeholder="••••••••••••" required autocomplete="current-password">
           </div>
           <button id="go" type="submit" class="btn-submit">Sign In to Dashboard</button>
@@ -149,7 +685,7 @@ function showLogin(msg){
     const password = $('#p').value;
     if(!email || !password) return;
     btn.disabled = true;
-    btn.textContent = 'Signing in…';
+    btn.textContent = 'Authenticating…';
     try {
       const { error } = await sb.auth.signInWithPassword({ email, password });
       if(error){
@@ -166,18 +702,76 @@ function showLogin(msg){
 async function enter(){
   const { data: { user } } = await sb.auth.getUser();
   const { data: prof } = await sb.from('profiles').select('full_name,role').eq('id', user.id).single();
-  if(!prof || prof.role !== 'admin'){ await sb.auth.signOut(); return showLogin('This account is not an admin.'); }
+  if(!prof || prof.role !== 'admin'){ await sb.auth.signOut(); return showLogin('This account does not have administrator privileges.'); }
   me = prof; render();
 }
 
 // ---------- shell ----------
 async function render(){
-  $('#app').innerHTML = `<header><h1>🏥 MediQ Admin</h1><span class="muted">${esc(me.full_name||'')}</span>
-  <button class="sec" id="out">Sign out</button></header><main><div class="stats" id="stats"></div>
-  <nav>${[['apps','Applications'],['hosp','Hospitals'],['users','Users']].map(([k,l])=>
-    `<button class="sec ${tab===k?'on':''}" data-t="${k}">${l}</button>`).join('')}</nav><div id="view">Loading…</div></main>`;
+  $('#app').innerHTML = `
+    <header>
+      <div class="brand-group">
+        <div class="brand-logo-icon">${MEDIQ_LOGO_SVG}</div>
+        <div class="brand-title-wrap">
+          <h1>
+            <span class="brand-title-navy">Medi</span><span class="brand-title-cyan">Q</span>
+            <span style="font-size:13px;font-weight:700;color:var(--mut);margin-left:4px;">ADMIN</span>
+          </h1>
+          <p>Operations & Verification Portal</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="admin-badge">
+          <div class="admin-avatar-dot"></div>
+          <span>${esc(me.full_name || 'Admin')}</span>
+        </div>
+        <button class="sec" id="out" style="padding:7px 12px;font-size:12px;">Sign out</button>
+      </div>
+    </header>
+
+    <main>
+      <div class="stats" id="stats">
+        <div class="stat-card" style="opacity:0.6"><div class="stat-info"><b>…</b><span>Loading metrics</span></div></div>
+      </div>
+
+      <nav class="tab-bar">
+        <div class="tab-pills">
+          <button class="${tab==='apps'?'on':''}" data-t="apps">
+            <span>📋 Applications</span>
+            <span class="count-pill" id="badgePendingApps" style="display:none;">0</span>
+          </button>
+          <button class="${tab==='hosp'?'on':''}" data-t="hosp">
+            <span>🏥 Hospitals</span>
+          </button>
+          <button class="${tab==='users'?'on':''}" data-t="users">
+            <span>👥 Users</span>
+          </button>
+        </div>
+
+        <div class="search-box">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input id="globalSearch" placeholder="Search records by name, email, city..." value="${esc(searchQuery)}">
+        </div>
+      </nav>
+
+      <div id="view">
+        <div class="empty-box"><p>Loading records…</p></div>
+      </div>
+    </main>`;
+
   $('#out').onclick = async () => { await sb.auth.signOut(); location.reload(); };
-  document.querySelectorAll('nav button').forEach(b => b.onclick = () => { tab = b.dataset.t; render(); });
+  document.querySelectorAll('nav.tab-bar .tab-pills button').forEach(b => b.onclick = () => { tab = b.dataset.t; render(); });
+  
+  const searchInput = $('#globalSearch');
+  if(searchInput){
+    searchInput.oninput = (e) => {
+      searchQuery = e.target.value.toLowerCase();
+      if(tab === 'apps') renderAppsList();
+      else if(tab === 'hosp') renderHospitalsList();
+      else if(tab === 'users') renderUsersList();
+    };
+  }
+
   loadStats();
   ({apps: viewApps, hosp: viewHospitals, users: viewUsers})[tab]();
 }
@@ -185,69 +779,271 @@ async function render(){
 async function loadStats(){
   const cnt = async (t, f) => { let q = sb.from(t).select('*', {count:'exact', head:true}); if(f) q = f(q); const {count} = await q; return count ?? 0; };
   const [pend, hosp, hpend, pat, staff] = await Promise.all([
-    cnt('staff_applications', q => q.eq('status','pending')), cnt('hospitals', q => q.eq('status','approved')),
-    cnt('hospitals', q => q.eq('status','pending')), cnt('profiles', q => q.eq('role','patient')),
-    cnt('profiles', q => q.in('role',['doctor','receptionist']))]);
-  $('#stats').innerHTML = [['Pending applications',pend],['Pending hospitals',hpend],['Live hospitals',hosp],['Patients',pat],['Staff',staff]]
-    .map(([l,n]) => `<div class="card stat"><b>${n}</b><span>${l}</span></div>`).join('');
+    cnt('staff_applications', q => q.eq('status','pending')),
+    cnt('hospitals', q => q.eq('status','approved')),
+    cnt('hospitals', q => q.eq('status','pending')),
+    cnt('profiles', q => q.eq('role','patient')),
+    cnt('profiles', q => q.in('role',['doctor','receptionist']))
+  ]);
+
+  const badge = $('#badgePendingApps');
+  if(badge && pend > 0){
+    badge.textContent = pend;
+    badge.style.display = 'inline-block';
+  }
+
+  $('#stats').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-icon amber">⏳</div>
+      <div class="stat-info"><b>${pend}</b><span>Pending Staff</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon purple">🏥</div>
+      <div class="stat-info"><b>${hpend}</b><span>Pending Hospitals</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green">🏢</div>
+      <div class="stat-info"><b>${hosp}</b><span>Live Hospitals</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon blue">🩺</div>
+      <div class="stat-info"><b>${staff}</b><span>Medical Staff</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon cyan">👥</div>
+      <div class="stat-info"><b>${pat}</b><span>Patients</span></div>
+    </div>`;
 }
 
 // ---------- applications ----------
 async function viewApps(){
   const { data, error } = await sb.from('staff_applications')
     .select('*, applicant:profiles!user_id(full_name,email,phone), hospitals(*)').order('created_at', {ascending:false});
-  if(error) return $('#view').innerHTML = `<div class="err">${esc(error.message)} — has sql/07 been run?</div>`;
-  const list = data.filter(a => appFilter === 'all' || a.status === appFilter);
-  $('#view').innerHTML = `<div class="row" style="margin-bottom:12px">${['pending','approved','rejected','all'].map(s =>
-    `<button class="sec ${appFilter===s?'on':''}" data-f="${s}">${s}</button>`).join('')}</div>` +
-    (list.length ? list.map(appCard).join('') : '<div class="card muted">Nothing here.</div>');
-  document.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { appFilter = b.dataset.f; viewApps(); });
-  document.querySelectorAll('[data-approve]').forEach(b => b.onclick = () => decide(b.dataset.approve, true));
-  document.querySelectorAll('[data-reject]').forEach(b => b.onclick = () => decide(b.dataset.reject, false));
+  if(error) return $('#view').innerHTML = `<div class="card alert-error">${esc(error.message)} — has sql/07 been run?</div>`;
+  cachedApps = data || [];
+  renderAppsList();
 }
 
-function kv(pairs){ return '<dl class="kv">' + pairs.filter(p => p[1] !== null && p[1] !== undefined && p[1] !== '')
-  .map(([k,v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('') + '</dl>'; }
+function renderAppsList(){
+  let list = cachedApps.filter(a => appFilter === 'all' || a.status === appFilter);
+  if(searchQuery){
+    list = list.filter(a => {
+      const p = a.applicant || {}, h = a.hospitals || {};
+      const haystack = [p.full_name, p.email, p.phone, a.specialty, a.license_number, h.name, h.city].filter(Boolean).join(' ').toLowerCase();
+      return haystack.includes(searchQuery);
+    });
+  }
+
+  $('#view').innerHTML = `
+    <div class="row" style="margin-bottom:14px">
+      ${['pending','approved','rejected','all'].map(s =>
+        `<button class="sec ${appFilter===s?'on':''}" data-f="${s}" style="text-transform:capitalize;">${s}</button>`).join('')}
+      <span class="muted" style="margin-left:auto;font-size:12px;">Showing ${list.length} application${list.length===1?'':'s'}</span>
+    </div>
+    ${list.length ? list.map(appCard).join('') : `
+      <div class="card empty-box">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <p>No applications match the current filter.</p>
+      </div>`}`;
+
+  document.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { appFilter = b.dataset.f; renderAppsList(); });
+  document.querySelectorAll('[data-approve]').forEach(b => b.onclick = () => decide(b.dataset.approve, true));
+  document.querySelectorAll('[data-reject]').forEach(b => b.onclick = () => openRejectModal(b.dataset.reject));
+}
+
+function kv(pairs){
+  return '<dl class="kv">' + pairs.filter(p => p[1] !== null && p[1] !== undefined && p[1] !== '')
+    .map(([k,v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('') + '</dl>';
+}
 
 function appCard(a){
   const p = a.applicant || {}, h = a.hospitals || {};
-  const imgs = (h.image_urls || []).filter(u => /^https:\/\//.test(u)).map(u => `<img src="${esc(u)}" alt="">`).join('');
-  return `<div class="card"><div class="row"><h3 class="grow" style="margin:0">${esc(p.full_name||'Unnamed')} · ${esc(a.requested_role)}</h3>
-    <span class="tag ${esc(a.status)}">${esc(a.status)}</span></div>
-    ${kv([['Email',p.email],['Phone',p.phone],['Applied',new Date(a.created_at).toLocaleString()],['License no.',a.license_number],
-      ['Specialty',a.specialty],['Experience',a.experience_years?a.experience_years+' yrs':''],['Fee',a.consultation_fee?'₹'+a.consultation_fee:''],
-      ['Qualification',a.qualification],['Bio',a.bio],['Rejection reason',a.rejection_reason]])}
-    <b>${a.is_new_hospital ? '🆕 New hospital' : 'Existing hospital'}: ${esc(h.name||'—')}</b>
-    ${a.is_new_hospital ? kv([['Type',h.type],['Address',[h.address,h.city,h.state].filter(Boolean).join(', ')],['Phone',h.phone],['Email',h.email],
-      ['Registration no.',h.registration_number],['Hours',h.opening_hours],['Beds',h.bed_count],['Emergency 24x7',h.emergency_24x7?'Yes':'No'],
-      ['Services',(h.facilities||[]).join(', ')],['About',h.description]]) + (imgs ? `<div class="imgs">${imgs}</div>` : '<p class="muted">No photos uploaded.</p>') : ''}
-    ${a.status === 'pending' ? `<div class="row"><button class="ok" data-approve="${esc(a.id)}">Approve</button>
-      <button class="bad" data-reject="${esc(a.id)}">Reject…</button></div>` : ''}</div>`;
+  const imgs = (h.image_urls || []).filter(u => /^https:\/\//.test(u)).map(u => `<img src="${esc(u)}" alt="Hospital photo">`).join('');
+  const isPending = a.status === 'pending';
+
+  return `
+    <div class="card" style="border-left: 4px solid ${a.status==='approved'?'var(--ok)':a.status==='rejected'?'var(--bad)':'var(--warn)'}">
+      <div class="row" style="margin-bottom:8px;">
+        <div class="grow">
+          <h3 style="font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px;">
+            <span>${esc(p.full_name || 'Unnamed Applicant')}</span>
+            <span class="tag ${esc(a.requested_role)}">${esc(a.requested_role)}</span>
+          </h3>
+        </div>
+        <span class="tag ${esc(a.status)}">${esc(a.status)}</span>
+      </div>
+
+      ${kv([
+        ['Email', p.email],
+        ['Phone', p.phone],
+        ['Applied on', new Date(a.created_at).toLocaleString()],
+        ['License Number', a.license_number],
+        ['Specialty', a.specialty],
+        ['Experience', a.experience_years ? a.experience_years + ' Years' : ''],
+        ['Consultation Fee', a.consultation_fee ? '₹' + a.consultation_fee : ''],
+        ['Qualification', a.qualification],
+        ['Bio', a.bio],
+        ['Rejection Reason', a.rejection_reason]
+      ])}
+
+      <div style="margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);">
+        <p style="font-size:13px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+          <span>${a.is_new_hospital ? '🆕 Registration for New Hospital' : '🏥 Affiliated Hospital'}:</span>
+          <span style="color:var(--pri);">${esc(h.name || '—')}</span>
+        </p>
+        ${a.is_new_hospital ? kv([
+          ['Hospital Type', h.type],
+          ['Full Address', [h.address, h.city, h.state].filter(Boolean).join(', ')],
+          ['Contact Phone', h.phone],
+          ['Hospital Email', h.email],
+          ['Registration No.', h.registration_number],
+          ['Hours of Operation', h.opening_hours],
+          ['Bed Capacity', h.bed_count ? h.bed_count + ' Beds' : ''],
+          ['24x7 Emergency', h.emergency_24x7 ? 'Yes' : 'No'],
+          ['Facilities', (h.facilities || []).join(', ')],
+          ['Description', h.description]
+        ]) + (imgs ? `<div class="imgs">${imgs}</div>` : '<p class="muted" style="font-size:12px;margin:6px 0;">No hospital photos uploaded.</p>') : ''}
+      </div>
+
+      ${isPending ? `
+        <div class="row" style="margin-top:18px;padding-top:12px;border-top:1px solid var(--line);">
+          <button class="ok" data-approve="${esc(a.id)}">✓ Approve Application</button>
+          <button class="bad" data-reject="${esc(a.id)}">✕ Reject with Reason…</button>
+        </div>` : ''}
+    </div>`;
 }
 
-async function decide(id, approve){
+// Modal for rejection
+function openRejectModal(id){
+  const old = document.querySelector('.modal-overlay');
+  if(old) old.remove();
+
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal-box">
+      <h3 class="modal-title">Reject Staff Application</h3>
+      <p class="modal-sub">Please specify a reason. This explanation will be displayed directly to the applicant.</p>
+
+      <div class="quick-reasons">
+        <span class="chip-reason" onclick="$('#rejectReasonText').value=this.textContent">Medical registration unverified</span>
+        <span class="chip-reason" onclick="$('#rejectReasonText').value=this.textContent">Hospital address invalid</span>
+        <span class="chip-reason" onclick="$('#rejectReasonText').value=this.textContent">Duplicate application</span>
+        <span class="chip-reason" onclick="$('#rejectReasonText').value=this.textContent">Incomplete credentials</span>
+      </div>
+
+      <textarea id="rejectReasonText" rows="3" placeholder="Enter reason shown to applicant..." autofocus></textarea>
+
+      <div class="modal-actions">
+        <button class="sec" id="btnCancelReject">Cancel</button>
+        <button class="bad" id="btnConfirmReject">Confirm Rejection</button>
+      </div>
+    </div>`;
+
+  document.body.appendChild(modal);
+  $('#btnCancelReject').onclick = () => modal.remove();
+  $('#btnConfirmReject').onclick = async () => {
+    const reason = $('#rejectReasonText').value.trim();
+    if(!reason){ alert('Please enter a rejection reason.'); return; }
+    modal.remove();
+    decide(id, false, reason);
+  };
+}
+
+async function decide(id, approve, reason=null){
   let res;
-  if(approve){ if(!confirm('Approve this application? The user becomes staff right away.')) return;
-    res = await sb.rpc('approve_staff_application', { p_application_id: id }); }
-  else { const reason = prompt('Reason shown to the applicant:'); if(reason === null) return;
-    res = await sb.rpc('reject_staff_application', { p_application_id: id, p_reason: reason }); }
-  if(res.error || res.data?.success === false) alert(res.error?.message || res.data.error);
-  render();
+  if(approve){
+    if(!confirm('Approve this staff application? The user will immediately receive staff privileges.')) return;
+    res = await sb.rpc('approve_staff_application', { p_application_id: id });
+  } else {
+    res = await sb.rpc('reject_staff_application', { p_application_id: id, p_reason: reason });
+  }
+
+  if(res.error || res.data?.success === false){
+    toast(res.error?.message || res.data?.error || 'Action failed', true);
+  } else {
+    toast(approve ? 'Application approved successfully! ✨' : 'Application marked as rejected.');
+  }
+  loadStats();
+  viewApps();
 }
 
 // ---------- hospitals ----------
 async function viewHospitals(){
-  const { data, error } = await sb.from('hospitals').select('id,name,city,status,active,rating,review_count,image_url,phone,emergency_24x7').order('created_at', {ascending:false});
-  if(error) return $('#view').innerHTML = `<div class="err">${esc(error.message)}</div>`;
-  $('#view').innerHTML = `<div class="card" style="overflow-x:auto"><table><tr><th></th><th>Hospital</th><th>City</th><th>Status</th><th>Rating</th><th>Actions</th></tr>` +
-    data.map(h => `<tr><td>${h.image_url && /^https:/.test(h.image_url) ? `<img src="${esc(h.image_url)}" width="54" height="40" style="object-fit:cover;border-radius:8px" alt="">` : '🏥'}</td>
-    <td><b>${esc(h.name)}</b><br><span class="muted">${esc(h.phone||'')}${h.emergency_24x7 ? ' · 24x7 ER' : ''}</span></td><td>${esc(h.city||'')}</td>
-    <td><span class="tag ${esc(h.status)}">${esc(h.status)}</span></td><td>${h.rating ? '★ '+esc(h.rating)+' ('+esc(h.review_count)+')' : '—'}</td>
-    <td class="row">${h.status !== 'approved' ? `<button class="ok" data-hs="approved" data-id="${esc(h.id)}">Approve</button>` : `<button class="warn" data-hs="rejected" data-id="${esc(h.id)}">Suspend</button>`}
-    ${h.status === 'pending' ? `<button class="bad" data-hs="rejected" data-id="${esc(h.id)}">Reject</button>` : ''}</td></tr>`).join('') + '</table></div>';
+  const { data, error } = await sb.from('hospitals')
+    .select('id,name,city,status,active,rating,review_count,image_url,phone,emergency_24x7')
+    .order('created_at', {ascending:false});
+  if(error) return $('#view').innerHTML = `<div class="card alert-error">${esc(error.message)}</div>`;
+  cachedHospitals = data || [];
+  renderHospitalsList();
+}
+
+function renderHospitalsList(){
+  let list = cachedHospitals;
+  if(searchQuery){
+    list = list.filter(h => {
+      const haystack = [h.name, h.city, h.phone, h.status].filter(Boolean).join(' ').toLowerCase();
+      return haystack.includes(searchQuery);
+    });
+  }
+
+  $('#view').innerHTML = `
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:64px;"></th>
+              <th>Hospital</th>
+              <th>City</th>
+              <th>Status</th>
+              <th>Rating</th>
+              <th style="text-align:right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${list.length ? list.map(h => `
+              <tr>
+                <td>
+                  ${h.image_url && /^https:/.test(h.image_url) 
+                    ? `<img src="${esc(h.image_url)}" width="50" height="38" style="object-fit:cover;border-radius:8px;border:1px solid var(--line);" alt="">` 
+                    : `<div style="width:50px;height:38px;border-radius:8px;background:var(--bg);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:18px;">🏥</div>`}
+                </td>
+                <td>
+                  <b style="font-size:14px;">${esc(h.name)}</b><br>
+                  <span class="muted" style="font-size:12px;">${esc(h.phone || '')}${h.emergency_24x7 ? ' · <span style="color:#ef4444;font-weight:700;">24x7 ER</span>' : ''}</span>
+                </td>
+                <td><span style="font-weight:600;">${esc(h.city || '—')}</span></td>
+                <td><span class="tag ${esc(h.status)}">${esc(h.status)}</span></td>
+                <td>${h.rating ? '★ ' + esc(h.rating) + ' <span class="muted">(' + esc(h.review_count) + ')</span>' : '<span class="muted">—</span>'}</td>
+                <td style="text-align:right;">
+                  <div class="row" style="justify-content:flex-end;">
+                    ${h.status !== 'approved' 
+                      ? `<button class="ok" style="padding:5px 12px;font-size:12px;" data-hs="approved" data-id="${esc(h.id)}">Approve</button>` 
+                      : `<button class="sec" style="padding:5px 12px;font-size:12px;" data-hs="rejected" data-id="${esc(h.id)}">Suspend</button>`}
+                    ${h.status === 'pending' 
+                      ? `<button class="bad" style="padding:5px 12px;font-size:12px;" data-hs="rejected" data-id="${esc(h.id)}">Reject</button>` 
+                      : ''}
+                  </div>
+                </td>
+              </tr>`).join('') : `
+              <tr><td colspan="6" class="empty-box">No hospitals match the search filter.</td></tr>`}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+
   document.querySelectorAll('[data-hs]').forEach(b => b.onclick = async () => {
-    const { data: r, error: e } = await sb.rpc('admin_set_hospital_status', { p_hospital_id: b.dataset.id, p_status: b.dataset.hs });
-    if(e || r?.success === false) alert(e?.message || r.error); render();
+    const action = b.dataset.hs;
+    if(!confirm(`Are you sure you want to mark this hospital as ${action}?`)) return;
+    const { data: r, error: e } = await sb.rpc('admin_set_hospital_status', { p_hospital_id: b.dataset.id, p_status: action });
+    if(e || r?.success === false){
+      toast(e?.message || r?.error || 'Action failed', true);
+    } else {
+      toast(`Hospital status updated to ${action}! ✨`);
+    }
+    loadStats();
+    viewHospitals();
   });
 }
 
@@ -256,13 +1052,69 @@ async function viewUsers(){
   let q = sb.from('profiles').select('full_name,email,phone,role,requested_role,created_at').order('created_at', {ascending:false}).limit(300);
   if(userFilter !== 'all') q = q.eq('role', userFilter);
   const { data, error } = await q;
-  if(error) return $('#view').innerHTML = `<div class="err">${esc(error.message)}</div>`;
-  $('#view').innerHTML = `<div class="row" style="margin-bottom:12px">${['all','patient','doctor','receptionist','admin'].map(r =>
-    `<button class="sec ${userFilter===r?'on':''}" data-r="${r}">${r}</button>`).join('')}</div>
-    <div class="card" style="overflow-x:auto"><table><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Joined</th></tr>` +
-    data.map(u => `<tr><td>${esc(u.full_name)}</td><td>${esc(u.email)}</td><td>${esc(u.phone||'')}</td>
-    <td>${esc(u.role)}${u.role !== u.requested_role && u.requested_role && u.requested_role !== 'patient' ? ` <span class="muted">(asked: ${esc(u.requested_role)})</span>` : ''}</td>
-    <td>${new Date(u.created_at).toLocaleDateString()}</td></tr>`).join('') + '</table></div>';
+  if(error) return $('#view').innerHTML = `<div class="card alert-error">${esc(error.message)}</div>`;
+  cachedUsers = data || [];
+  renderUsersList();
+}
+
+function renderUsersList(){
+  let list = cachedUsers;
+  if(searchQuery){
+    list = list.filter(u => {
+      const haystack = [u.full_name, u.email, u.phone, u.role, u.requested_role].filter(Boolean).join(' ').toLowerCase();
+      return haystack.includes(searchQuery);
+    });
+  }
+
+  $('#view').innerHTML = `
+    <div class="row" style="margin-bottom:14px">
+      ${['all','patient','doctor','receptionist','admin'].map(r =>
+        `<button class="sec ${userFilter===r?'on':''}" data-r="${r}" style="text-transform:capitalize;">${r}</button>`).join('')}
+      <span class="muted" style="margin-left:auto;font-size:12px;">Showing ${list.length} user${list.length===1?'':'s'}</span>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Assigned Role</th>
+              <th>Joined Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${list.length ? list.map(u => {
+              const initials = (u.full_name || 'U').split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase();
+              return `
+              <tr>
+                <td>
+                  <div class="row" style="gap:10px;">
+                    <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg, #0284c7, #0f2851);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">${esc(initials)}</div>
+                    <div>
+                      <b style="font-size:13px;">${esc(u.full_name || 'Unnamed')}</b>
+                    </div>
+                  </div>
+                </td>
+                <td><span style="color:var(--tx-sec);">${esc(u.email || '—')}</span></td>
+                <td><span style="color:var(--tx-sec);">${esc(u.phone || '—')}</span></td>
+                <td>
+                  <span class="tag ${esc(u.role)}">${esc(u.role)}</span>
+                  ${u.role !== u.requested_role && u.requested_role && u.requested_role !== 'patient' 
+                    ? `<span class="muted" style="font-size:11px;margin-left:4px;">(Requested: ${esc(u.requested_role)})</span>` 
+                    : ''}
+                </td>
+                <td><span style="color:var(--mut);">${new Date(u.created_at).toLocaleDateString()}</span></td>
+              </tr>`;
+            }).join('') : `
+              <tr><td colspan="5" class="empty-box">No users found for this filter.</td></tr>`}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+
   document.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { userFilter = b.dataset.r; viewUsers(); });
 }
 </script>

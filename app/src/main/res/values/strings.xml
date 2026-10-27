@@ -1,7 +1,7 @@
 <resources>
     <!-- App Name -->
     <string name="app_name">MediQ</string>
-    <string name="app_tagline">Your Health, Our Priority</string>
+    <string name="app_tagline">FIND HEALTHCARE NEARBY</string>
     <string name="app_subtitle_1">Smart Appointments</string>
     <string name="app_subtitle_2">Shorter Waits</string>
     <string name="app_subtitle_3">Better Healthcare</string>
@@ -18,7 +18,7 @@
     <string name="btn_login">Login</string>
     <string name="btn_create_account">Create Account</string>
     <string name="text_or">OR</string>
-    <string name="btn_login_otp">Login with OTP / Magic Link</string>
+    <string name="btn_login_otp">Login with OTP</string>
     <string name="hint_email_required">Email Address</string>
     <string name="otp_title">Verify Email</string>
     <string name="otp_subtitle">We have sent a verification code to your email</string>
@@ -26,8 +26,8 @@
     <string name="btn_verify_otp">Verify &amp; Proceed</string>
     <string name="text_didnt_receive_otp">Didn\'t receive the code?</string>
     <string name="text_resend_otp">Resend OTP</string>
-    <string name="dialog_magic_link_title">Login via Magic Link</string>
-    <string name="dialog_magic_link_msg">Enter your Gmail to receive a secure login link or OTP code:</string>
+    <string name="dialog_magic_link_title">Login via OTP</string>
+    <string name="dialog_magic_link_msg">Enter your Gmail to receive a secure OTP code:</string>
     <string name="btn_send_link">Send Login Code</string>
     <string name="magic_link_sent_toast">Verification code sent to your Gmail!</string>
     <string name="signup_verification_msg">Verification code sent! Please verify your email to complete registration.</string>
@@ -153,6 +153,6 @@
 
     <!-- Password Reset -->
     <string name="title_reset_password">Reset Password</string>
-    <string name="subtitle_reset_password">Enter the 8-digit verification code sent to your email and set a new password.</string>
+    <string name="subtitle_reset_password">Enter the 6-digit verification code sent to your email and set a new password.</string>
     <string name="btn_reset_password">Reset Password &amp; Sign In</string>
 </resources>

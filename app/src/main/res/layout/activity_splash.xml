@@ -5,34 +5,48 @@
     android:id="@+id/splashRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_gradient_light_blue">
+    android:background="@drawable/bg_splash_gradient">
 
-    <!-- Top MediQ Logo & Branding -->
+    <!-- Center Hero Branding Container -->
     <LinearLayout
-        android:id="@+id/layoutLogoContainer"
+        android:id="@+id/layoutSplashCenter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/ivHospitalIllustration"
+        app:layout_constraintBottom_toTopOf="@+id/layoutFooter"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.45">
+        app:layout_constraintVertical_bias="0.46">
 
-        <!-- Heart + Pulse Logo -->
-        <ImageView
-            android:id="@+id/ivLogo"
-            android:layout_width="84dp"
-            android:layout_height="84dp"
-            android:contentDescription="@string/app_name"
-            android:src="@drawable/ic_mediq_logo" />
+        <!-- Elevated Brand Icon Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardLogo"
+            android:layout_width="112dp"
+            android:layout_height="112dp"
+            app:cardBackgroundColor="@color/colorSurface"
+            app:cardCornerRadius="30dp"
+            app:cardElevation="10dp"
+            app:strokeColor="#E2EEF9"
+            app:strokeWidth="1.5dp">
 
-        <!-- Brand Name: Medi in Blue, Q in Green -->
+            <ImageView
+                android:id="@+id/ivLogo"
+                android:layout_width="76dp"
+                android:layout_height="76dp"
+                android:layout_gravity="center"
+                android:contentDescription="@string/app_name"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_mediq_logo" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Brand Name Wordmark: Medi (Navy) + Q (Cyan) -->
         <LinearLayout
+            android:id="@+id/layoutBrandName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="22dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
@@ -41,8 +55,8 @@
                 android:layout_height="wrap_content"
                 android:letterSpacing="-0.02"
                 android:text="Medi"
-                android:textColor="@color/colorPrimary"
-                android:textSize="36sp"
+                android:textColor="@color/colorLogoNavy"
+                android:textSize="40sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -50,81 +64,113 @@
                 android:layout_height="wrap_content"
                 android:letterSpacing="-0.02"
                 android:text="Q"
-                android:textColor="@color/colorLogoGreen"
-                android:textSize="36sp"
+                android:textColor="@color/colorLogoCyan"
+                android:textSize="40sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- Tagline: Your Health, Our Priority -->
+        <!-- Tagline -->
         <TextView
             android:id="@+id/tvTagline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="8dp"
             android:gravity="center"
-            android:lineSpacingExtra="4dp"
+            android:letterSpacing="0.04"
             android:text="@string/app_tagline"
-            android:textColor="#1E3A8A"
-            android:textSize="22sp"
-            android:textStyle="bold" />
+            android:textColor="@color/colorTextSecondary"
+            android:textSize="14sp" />
+
+        <!-- Feature Highlights Pill Badge -->
+        <LinearLayout
+            android:id="@+id/layoutFeaturesBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:background="@drawable/bg_badge_splash_features"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingTop="7dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="7dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Appointments"
+                android:textColor="@color/colorPrimary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp"
+                android:text="•"
+                android:textColor="#93C5FD"
+                android:textSize="12sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Doctors"
+                android:textColor="@color/colorPrimary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp"
+                android:text="•"
+                android:textColor="#93C5FD"
+                android:textSize="12sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Emergency"
+                android:textColor="@color/colorPrimary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
     </LinearLayout>
 
-    <!-- Hospital Illustration in Center -->
-    <ImageView
-        android:id="@+id/ivHospitalIllustration"
-        android:layout_width="0dp"
-        android:layout_height="240dp"
-        android:adjustViewBounds="true"
-        android:contentDescription="@string/app_name"
-        android:scaleType="fitCenter"
-        android:src="@drawable/ic_hospital_illustration"
-        app:layout_constraintBottom_toTopOf="@+id/layoutSubtitles"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layoutLogoContainer" />
-
-    <!-- Bottom Features / Subtitles -->
+    <!-- Bottom Footer Area -->
     <LinearLayout
-        android:id="@+id/layoutSubtitles"
+        android:id="@+id/layoutFooter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="44dp"
+        android:layout_marginBottom="36dp"
         android:gravity="center_horizontal"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
+        <!-- Subtle loading indicator -->
+        <ProgressBar
+            android:id="@+id/progressSplash"
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/colorPrimary" />
+
         <TextView
-            android:id="@+id/tvSubtitle1"
+            android:id="@+id/tvFooterBrand"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/app_subtitle_1"
-            android:textColor="#3B82F6"
-            android:textSize="15sp"
+            android:layout_marginTop="12dp"
+            android:letterSpacing="0.14"
+            android:text="MEDIQ HEALTHCARE"
+            android:textColor="#94A3B8"
+            android:textSize="11sp"
             android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tvSubtitle2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="@string/app_subtitle_2"
-            android:textColor="#4B6B94"
-            android:textSize="14sp"
-            android:textStyle="normal" />
-
-        <TextView
-            android:id="@+id/tvSubtitle3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="@string/app_subtitle_3"
-            android:textColor="#4B6B94"
-            android:textSize="14sp"
-            android:textStyle="normal" />
-
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

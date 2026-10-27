@@ -57,7 +57,7 @@ public final class CardBinder {
         }
 
         ImageView iv = card.findViewById(R.id.ivDoctorAvatar);
-        int fallback = d.getAvatarResId() != 0 ? d.getAvatarResId() : R.drawable.ic_doctor_male_avatar;
+        int fallback = d.getAvatarResId();
         if (d.getAvatarUrl() != null && !d.getAvatarUrl().isEmpty()) {
             Glide.with(ctx).load(d.getAvatarUrl()).placeholder(fallback).error(fallback).into(iv);
         } else {

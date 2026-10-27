@@ -41,7 +41,7 @@ public class ReceptionistHomeActivity extends AppCompatActivity {
 
     private SwipeRefreshLayout swipe;
     private TextView tvName, tvMeta;
-    private ImageView ivCover;
+    private ImageView ivCover, ivStaffAvatar;
     private LinearLayout layoutQueues, layoutAppointments, layoutReviews;
     private String hospitalId;
 
@@ -53,6 +53,7 @@ public class ReceptionistHomeActivity extends AppCompatActivity {
         tvName = findViewById(R.id.tvHospName);
         tvMeta = findViewById(R.id.tvHospMeta);
         ivCover = findViewById(R.id.ivCover);
+        ivStaffAvatar = findViewById(R.id.ivStaffAvatar);
         layoutQueues = findViewById(R.id.layoutQueues);
         layoutAppointments = findViewById(R.id.layoutAppointments);
         layoutReviews = findViewById(R.id.layoutReviews);
@@ -66,6 +67,11 @@ public class ReceptionistHomeActivity extends AppCompatActivity {
             i.putExtra(HospitalFormActivity.EXTRA_HOSPITAL_ID, hospitalId);
             startActivity(i);
         });
+        View.OnClickListener openStaffProfile = v ->
+                com.example.mediq.ui.common.ProfileEditSheet.show(this, "receptionist", this::loadAll);
+        View btnEditProfile = findViewById(R.id.btnEditReceptionistProfile);
+        if (btnEditProfile != null) btnEditProfile.setOnClickListener(openStaffProfile);
+        if (ivStaffAvatar != null) ivStaffAvatar.setOnClickListener(openStaffProfile);
         swipe.setOnRefreshListener(this::loadAll);
     }
 
@@ -81,11 +87,20 @@ public class ReceptionistHomeActivity extends AppCompatActivity {
 
     private void loadAll() {
         String uid = SessionManager.getInstance(this).getUserId();
-        SupabaseClient.getInstance().get("profiles?id=eq." + uid + "&select=hospital_id", new SupabaseClient.Callback() {
+        updateAvatar(SessionManager.getInstance(this).getUserAvatarUrl());
+        SupabaseClient.getInstance().get("profiles?id=eq." + uid + "&select=hospital_id,avatar_url", new SupabaseClient.Callback() {
             @Override public void onSuccess(String json) {
                 try {
                     JSONArray arr = new JSONArray(json);
-                    if (arr.length() > 0) hospitalId = SupabaseClient.optStringSafe(arr.getJSONObject(0), "hospital_id");
+                    if (arr.length() > 0) {
+                        JSONObject p = arr.getJSONObject(0);
+                        hospitalId = SupabaseClient.optStringSafe(p, "hospital_id");
+                        String avatar = SupabaseClient.optStringSafe(p, "avatar_url");
+                        if (avatar != null && !avatar.isEmpty()) {
+                            SessionManager.getInstance(ReceptionistHomeActivity.this).setUserAvatarUrl(avatar);
+                            runOnUiThread(() -> updateAvatar(avatar));
+                        }
+                    }
                 } catch (Exception ignored) { }
                 if (hospitalId == null) { swipe.setRefreshing(false); tvName.setText("No hospital linked"); return; }
                 loadHospital();
@@ -93,6 +108,19 @@ public class ReceptionistHomeActivity extends AppCompatActivity {
             }
             @Override public void onError(Exception e) { swipe.setRefreshing(false); }
         });
+    }
+
+    private void updateAvatar(String url) {
+        if (ivStaffAvatar == null || isFinishing()) return;
+        if (url != null && !url.isEmpty()) {
+            Glide.with(this)
+                    .load(url.startsWith("content://") || url.startsWith("file://") ? android.net.Uri.parse(url) : url)
+                    .placeholder(R.drawable.ic_user_avatar)
+                    .circleCrop()
+                    .into(ivStaffAvatar);
+        } else {
+            ivStaffAvatar.setImageResource(R.drawable.ic_user_avatar);
+        }
     }
 
     private void loadHospital() {

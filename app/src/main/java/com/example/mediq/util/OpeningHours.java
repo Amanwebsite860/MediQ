@@ -27,7 +27,7 @@ public final class OpeningHours {
         if (raw == null || raw.trim().isEmpty()) return new Status(false, true, "Hours not listed");
         String s = raw.toLowerCase(Locale.ROOT).trim();
         if (s.contains("24x7") || s.contains("24/7") || s.contains("24 x 7") || s.contains("24 hour") || s.contains("24hr") || s.contains("24 hr")
-                || s.contains("round the clock")) {
+                || s.contains("round the clock") || s.contains("always open")) {
             return new Status(true, true, "Open 24 hours");
         }
         Matcher m = RANGE.matcher(s);
@@ -52,6 +52,7 @@ public final class OpeningHours {
                 start = to24(h1, ap1) * 60 + m1;
             }
         }
+        if (start == end) return new Status(true, true, "Open 24 hours");
 
         Calendar c = Calendar.getInstance();
         int now = c.get(Calendar.HOUR_OF_DAY) * 60 + c.get(Calendar.MINUTE);

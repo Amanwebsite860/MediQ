@@ -86,6 +86,17 @@ public class OtpVerificationActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> finish());
         btnVerifyOtp.setOnClickListener(v -> verifyOtp());
 
+        etOtpCode.addTextChangedListener(new android.text.TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                tilOtpCode.setError(null);
+                if (s != null && s.length() == 6) {
+                    verifyOtp();
+                }
+            }
+            @Override public void afterTextChanged(android.text.Editable s) {}
+        });
+
         tvResendOtp.setOnClickListener(v -> {
             if (canResend) {
                 sendOtp();
@@ -159,8 +170,8 @@ public class OtpVerificationActivity extends AppCompatActivity {
             return;
         }
 
-        if (code.length() < 6 || code.length() > 8) {
-            tilOtpCode.setError("Verification code must be 6 to 8 digits");
+        if (code.length() != 6) {
+            tilOtpCode.setError("Verification code must be 6 digits");
             return;
         }
 

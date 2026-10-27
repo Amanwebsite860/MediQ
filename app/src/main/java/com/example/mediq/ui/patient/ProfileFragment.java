@@ -342,52 +342,8 @@ public class ProfileFragment extends Fragment {
     }
 
     private void showEditProfileDialog() {
-        if (getContext() == null) return;
-        SessionManager session = SessionManager.getInstance(requireContext());
-
-        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_edit_profile, null);
-        TextInputEditText etName = dialogView.findViewById(R.id.etEditName);
-        TextInputEditText etPhone = dialogView.findViewById(R.id.etEditPhone);
-        TextInputEditText etBlood = dialogView.findViewById(R.id.etEditBloodGroup);
-        TextInputEditText etGender = dialogView.findViewById(R.id.etEditGender);
-        TextInputEditText etEmergency = dialogView.findViewById(R.id.etEditEmergency);
-
-        etName.setText(session.getUserName());
-        etPhone.setText(session.getUserPhone());
-        if (!"Not set".equalsIgnoreCase(session.getUserBloodGroup())) etBlood.setText(session.getUserBloodGroup());
-        if (!"Not set".equalsIgnoreCase(session.getUserGender())) etGender.setText(session.getUserGender());
-        if (!"Not set".equalsIgnoreCase(session.getUserEmergencyContact())) etEmergency.setText(session.getUserEmergencyContact());
-
-        new MaterialAlertDialogBuilder(requireContext())
-                .setView(dialogView)
-                .setPositiveButton("Save Changes", (dialog, which) -> {
-                    String newName = etName.getText() != null ? etName.getText().toString().trim() : "";
-                    String newPhone = etPhone.getText() != null ? etPhone.getText().toString().trim() : "";
-                    String newBlood = etBlood.getText() != null ? etBlood.getText().toString().trim() : "";
-                    String newGender = etGender.getText() != null ? etGender.getText().toString().trim() : "";
-                    String newEmergency = etEmergency.getText() != null ? etEmergency.getText().toString().trim() : "";
-
-                    String bloodNorm = newBlood.toUpperCase(java.util.Locale.ROOT).replace(" ", "");
-                    if (!bloodNorm.isEmpty() && !bloodNorm.matches("^(A|B|AB|O)[+-]$")) {
-                        com.example.mediq.util.ToastUtils.show(getActivity(), "Blood group should look like A+, O-, AB+");
-                        return;
-                    }
-                    newBlood = bloodNorm;
-
-                    session.updateProfileDetails(
-                            newName.isEmpty() ? session.getUserName() : newName,
-                            newPhone,
-                            newBlood.isEmpty() ? "Not set" : newBlood,
-                            newGender.isEmpty() ? "Not set" : newGender,
-                            newEmergency.isEmpty() ? "Not set" : newEmergency
-                    );
-
-                    populateProfileViews();
-                    syncProfileToBackend(newName, newPhone, newBlood, newGender, newEmergency);
-                    com.example.mediq.util.ToastUtils.show(getActivity(), "Profile updated successfully");
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
+        if (getActivity() == null) return;
+        com.example.mediq.ui.common.ProfileEditSheet.show(getActivity(), "patient", this::populateProfileViews);
     }
 
     private void syncProfileToBackend(String name, String phone, String blood, String gender, String emergency) {
@@ -433,7 +389,7 @@ public class ProfileFragment extends Fragment {
         }
 
         SupabaseClient.getInstance().get(
-                "appointments?patient_id=eq." + uid + "&select=id,status,appointment_date,appointment_time,doctors(name,specialty),hospitals(name),queue_entries(token_number)&order=appointment_date.desc,appointment_time.desc&limit=3",
+                "appointments?patient_id=eq." + uid + "&select=id,status,appointment_date,appointment_time,doctors(name,specialty,avatar_url,profiles(gender)),hospitals(name),queue_entries(token_number)&order=appointment_date.desc,appointment_time.desc&limit=3",
                 new SupabaseClient.Callback() {
                     @Override
                     public void onSuccess(String json) {
@@ -467,8 +423,29 @@ public class ProfileFragment extends Fragment {
                                     hospName = hospObj.optString("name", hospName);
                                 }
 
-                                list.add(new Appointment(id, docName, docSpec, R.drawable.ic_doctor_male_avatar,
-                                        hospName, date, time, tokenNum, status));
+                                String docGender = null;
+                                if (docObj != null) {
+                                    JSONObject p = docObj.optJSONObject("profiles");
+                                    if (p != null) docGender = SupabaseClient.optStringSafe(p, "gender");
+                                }
+                                boolean isFemale = false;
+                                if (docGender != null && !docGender.isEmpty()) {
+                                    isFemale = docGender.toLowerCase(java.util.Locale.ROOT).startsWith("f");
+                                } else {
+                                    String dn = docName != null ? docName.toLowerCase(java.util.Locale.ROOT) : "";
+                                    isFemale = dn.contains("mrs") || dn.contains("ms.") || dn.contains("priya") || dn.contains("sunita")
+                                            || dn.contains("ananya") || dn.contains("pooja") || dn.contains("neha")
+                                            || docSpec.toLowerCase(java.util.Locale.ROOT).contains("gyne");
+                                }
+                                int docAvatar = isFemale ? R.drawable.ic_doctor_female_avatar : R.drawable.ic_doctor_male_avatar;
+
+                                Appointment appt = new Appointment(id, docName, docSpec, docAvatar,
+                                        hospName, date, time, tokenNum, status);
+                                if (docObj != null) {
+                                    String aUrl = SupabaseClient.optStringSafe(docObj, "avatar_url");
+                                    if (aUrl != null && !aUrl.isEmpty()) appt.setDoctorAvatarUrl(aUrl);
+                                }
+                                list.add(appt);
                             }
 
                             if (getActivity() != null) {

@@ -61,6 +61,7 @@ public class BookAppointmentActivity extends AppCompatActivity {
     private MaterialButton btnConfirm;
     private TextView tvNoSlots;
     private RecyclerView rvTimeSlots;
+    private boolean hasRetriedScheduleGeneration = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -168,6 +169,24 @@ public class BookAppointmentActivity extends AppCompatActivity {
                             }
 
                             JSONArray schedArray = new JSONArray(scheduleResponse);
+                            if (schedArray.length() == 0 && !hasRetriedScheduleGeneration) {
+                                hasRetriedScheduleGeneration = true;
+                                JSONObject rpcParams = new JSONObject();
+                                rpcParams.put("p_days_ahead", 30);
+                                SupabaseClient.getInstance().rpc("generate_future_schedules", rpcParams, new SupabaseClient.Callback() {
+                                    @Override
+                                    public void onSuccess(String ignored) {
+                                        loadSchedulesForSelectedDate();
+                                    }
+
+                                    @Override
+                                    public void onError(Exception e) {
+                                        runOnUiThread(() -> updateSlotViews(new ArrayList<>()));
+                                    }
+                                });
+                                return;
+                            }
+
                             List<TimeSlotItem> slots = new ArrayList<>();
 
                             String todayIso = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).format(Calendar.getInstance().getTime());
